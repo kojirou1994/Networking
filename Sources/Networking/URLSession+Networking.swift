@@ -25,8 +25,7 @@ open class URLSessionNetworking: Networking {
     jsonEncoder = .init()
   }
 
-  @inlinable
-  func request<E>(_ endpoint: E) -> URLRequest where E: Endpoint {
+  public func request<E>(_ endpoint: E) -> URLRequest where E: Endpoint {
     var components = urlComponents
     components.path = endpoint.path
     components.queryItems?.append(contentsOf: endpoint.queryItems)

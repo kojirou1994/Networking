@@ -25,8 +25,7 @@ open class AsyncHTTPClientNetworking: Networking {
     jsonEncoder = .init()
   }
 
-  @usableFromInline
-  func request<E>(_ endpoint: E) throws -> HTTPClient.Request where E: Endpoint {
+  public func request<E>(_ endpoint: E) -> HTTPClient.Request where E: Endpoint {
     var components = urlComponents
     components.path = endpoint.path
     components.queryItems?.append(contentsOf: endpoint.queryItems)
@@ -42,11 +41,11 @@ open class AsyncHTTPClientNetworking: Networking {
     let body: HTTPClient.Body?
     switch endpoint.contentType {
     case .json:
-      body = .data(try jsonEncoder.encode(endpoint.body))
+      body = .data(try! jsonEncoder.encode(endpoint.body))
     case .empty: body = nil
     }
     let url = components.url!
-    let request = try HTTPClient.Request(url: url, method: endpoint.method, body: body)
+    let request = try! HTTPClient.Request(url: url, method: endpoint.method, body: body)
     return request
   }
 
