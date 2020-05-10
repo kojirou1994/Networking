@@ -1,5 +1,8 @@
 import Foundation
 import NIOHTTP1
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public enum NetworkingError: Error {
   case emptyResponseBody
