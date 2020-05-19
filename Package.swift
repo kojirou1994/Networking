@@ -27,7 +27,6 @@ let package = Package(
             dependencies: [
                 "Networking",
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
-                .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client")
         ]),
         .testTarget(
