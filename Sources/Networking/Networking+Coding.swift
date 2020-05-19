@@ -1,6 +1,9 @@
 import Foundation
 import NIO
 import NIOFoundationCompat
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 // MARK:  Default implementation for encoding
 extension Networking where Request == URLRequest {
