@@ -1,9 +1,9 @@
 import Foundation
-import NIOHTTP1
 
 public protocol Endpoint {
   associatedtype RequestBody: Encodable = EmptyBody
-  associatedtype ResponseBody: Decodable = EmptyBody
+  associatedtype ResponseBody = Void
+  /// Note: path must begin with "/"
   var path: String { get }
   var body: RequestBody { get }
   var method: HTTPMethod { get }

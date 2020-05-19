@@ -1,32 +1,69 @@
-import NIOHTTP1
-
-public struct NetworkingResponse<R, Body> {
-  public let response: R
-  public let body: Body
-
-  public init(response: R, body: Body) {
-    self.response = response
-    self.body = body
-  }
-}
+@_exported import NIOHTTP1
+import Foundation
 
 public protocol Networking {
   associatedtype Request
   associatedtype Response
   associatedtype RawResponseBody = [UInt8]
 
-  func request<E>(_ endpoint: E) -> Request where E: Endpoint
+  typealias RawResult = Result<NetworkingResponse<Response, RawResponseBody>, Error>
+  typealias EndpointResult<E: Endpoint> = Result<NetworkingResponse<Response, Result<E.ResponseBody, Error>>, Error>
 
-  func executeRaw<E>(_ endpoint: E, completion: @escaping (Result<NetworkingResponse<Response, RawResponseBody>, Error>) -> Void) where E: Endpoint
+  var urlComponents: URLComponents { get }
+  var commonHTTPHeaders: HTTPHeaders { get }
+  var jsonDecoder: JSONDecoder { get }
+  var jsonEncoder: JSONEncoder { get }
 
-  func execute<E>(_ endpoint: E, completion: @escaping (Result<NetworkingResponse<Response, E.ResponseBody>, Error>) -> Void) where E: Endpoint
+//  func validate(response: Response) throws
+
+  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
+
+  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: Decodable
+
+  func executeRaw(
+    _ request: Request,
+    completion: @escaping (RawResult) -> Void
+  )
+
+  func execute<E>(
+    _ endpoint: E,
+    completion: @escaping (EndpointResult<E>) -> Void
+  ) where E: Endpoint, E.ResponseBody: Decodable
+}
+
+extension Networking {
+  @inlinable
+  public var jsonDecoder: JSONDecoder { .init() }
+
+  @inlinable
+  public var jsonEncoder: JSONEncoder { .init() }
+
+  @inlinable
+  public func executeRaw<E>(
+    _ endpoint: E,
+    completion: @escaping (RawResult) -> Void
+  ) where E: Endpoint {
+    do {
+      executeRaw(try request(endpoint), completion: completion)
+    } catch {
+      completion(.failure(error))
+    }
   }
 
-  #if canImport(Combine)
-  import Combine
-
-  @available(OSX 10.15, *)
-  public protocol NetworkingPublishable: Networking {
-    func publisher<E>(_ endpoint: E) -> AnyPublisher<NetworkingResponse<Response, E.ResponseBody>, Error> where E: Endpoint
+  @inlinable
+  public func execute<E>(
+    _ endpoint: E,
+    completion: @escaping (EndpointResult<E>) -> Void
+  ) where E: Endpoint, E.ResponseBody: Decodable {
+    do {
+      executeRaw(try request(endpoint)) { result in
+        completion(result.map { rawResponse in
+          .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+        })
+      }
+    } catch {
+      completion(.failure(error))
+    }
   }
-#endif
+
+}
