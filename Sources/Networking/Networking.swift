@@ -19,16 +19,12 @@ public protocol Networking {
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
 
   func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: Decodable
+  func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody
 
   func executeRaw(
     _ request: Request,
     completion: @escaping (RawResult) -> Void
   )
-
-  func execute<E>(
-    _ endpoint: E,
-    completion: @escaping (EndpointResult<E>) -> Void
-  ) where E: Endpoint, E.ResponseBody: Decodable
 }
 
 extension Networking {
@@ -55,14 +51,22 @@ extension Networking {
     _ endpoint: E,
     completion: @escaping (EndpointResult<E>) -> Void
   ) where E: Endpoint, E.ResponseBody: Decodable {
-    do {
-      executeRaw(try request(endpoint)) { result in
-        completion(result.map { rawResponse in
-          .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
-        })
-      }
-    } catch {
-      completion(.failure(error))
+    executeRaw(endpoint) { result in
+      completion(result.map { rawResponse in
+        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+      })
+    }
+  }
+
+  @inlinable
+  public func customExecute<E>(
+    _ endpoint: E,
+    completion: @escaping (EndpointResult<E>) -> Void
+  ) where E: Endpoint, E.ResponseBody: CustomResponseBody {
+    executeRaw(endpoint) { result in
+      completion(result.map { rawResponse in
+        .init(response: rawResponse.response, body: .init(catching: {try self.customDecode(endpoint, body: rawResponse.body)}))
+      })
     }
   }
 

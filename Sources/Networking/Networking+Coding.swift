@@ -54,6 +54,10 @@ extension Networking where RawResponseBody == Data {
     }
   }
 
+  @inlinable public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody {
+    try .init(body)
+  }
+
 }
 
 extension Networking where RawResponseBody == ByteBuffer {
@@ -64,6 +68,25 @@ extension Networking where RawResponseBody == ByteBuffer {
     case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: body)
     case .empty: fatalError()
     }
+  }
+
+  @inlinable public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody {
+    try .init(body.viewBytes(at: body.readerIndex, length: body.readerIndex) ?? ByteBufferView())
+  }
+
+}
+extension Networking where RawResponseBody == ByteBufferView {
+
+  @inlinable public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+    where E: Endpoint, E.ResponseBody: Decodable {
+      switch endpoint.acceptType {
+      case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: .init(body))
+      case .empty: fatalError()
+      }
+  }
+
+  @inlinable public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody {
+    try .init(body)
   }
 
 }

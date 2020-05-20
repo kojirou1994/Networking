@@ -18,15 +18,22 @@ public protocol Endpoint {
 
 public extension Endpoint {
   var method: HTTPMethod { .GET }
-  var acceptType: ContentType { .json }
   var queryItems: [URLQueryItem] { [] }
   var headers: HTTPHeaders { .init() }
   var acceptedStatusCode: Range<Int> { 200..<300 }
 }
 
+public protocol CustomResponseBody {
+  init<D>(_ data: D) throws where D: DataProtocol
+}
+
 public extension Endpoint where RequestBody == EmptyBody {
-  var body: EmptyBody { .init() }
+  var body: EmptyBody { fatalError("Should never be called") }
   var contentType: ContentType { .empty }
+}
+
+public extension Endpoint where ResponseBody: Decodable {
+  var acceptType: ContentType { .json }
 }
 
 public struct EmptyBody: Codable {

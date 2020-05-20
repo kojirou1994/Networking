@@ -1,4 +1,5 @@
 import NIO
+import Foundation
 
 public protocol EventLoopFutureNetworking: Networking {
 
@@ -23,10 +24,22 @@ extension EventLoopFutureNetworking {
     rawEventLoopFuture(request).whenComplete(completion)
   }
 
+  @inlinable
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, Result<E.ResponseBody, Error>>> where E : Endpoint, E.ResponseBody: Decodable {
     rawEventLoopFuture(endpoint)
       .map { rawResponse in
         .init(response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
+    }
+  }
+}
+
+extension EventLoopFutureNetworking where RawResponseBody: DataProtocol {
+
+  @inlinable
+  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, Result<E.ResponseBody, Error>>> where E : Endpoint, E.ResponseBody: CustomResponseBody {
+    rawEventLoopFuture(endpoint)
+      .map { rawResponse in
+        .init(response: rawResponse.response, body: .init{try self.customDecode(endpoint, body: rawResponse.body) })
     }
   }
 }

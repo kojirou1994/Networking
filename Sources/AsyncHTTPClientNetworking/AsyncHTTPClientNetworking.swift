@@ -8,7 +8,7 @@ open class AsyncHTTPClientNetworking: EventLoopFutureNetworking {
   public typealias Request = HTTPClient.Request
 
   public typealias Response = HTTPClient.Response
-  public typealias RawResponseBody = ByteBuffer
+  public typealias RawResponseBody = ByteBufferView
 
   public var urlComponents: URLComponents
   public var commonHTTPHeaders: HTTPHeaders
@@ -26,13 +26,15 @@ open class AsyncHTTPClientNetworking: EventLoopFutureNetworking {
   }
 
   public func rawEventLoopFuture(
-    _ request: HTTPClient.Request
-  ) -> EventLoopFuture<NetworkingResponse<HTTPClient.Response, ByteBuffer>> {
+    _ request: Request
+  ) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>> {
     client.execute(request: request).map { response in
       //        guard endpoint.acceptedStatusCode.contains(numericCast(response.status.code)) else {
       //          throw NetworkingError.invalidStatusCode(numericCast(response.status.code))
       //        }
-      return .init(response: response, body: response.body ?? ByteBuffer(ByteBufferView()))
+      let body = response.body ?? ByteBuffer(.init())
+      return .init(response: response,
+                   body: body.viewBytes(at: body.readerIndex, length: body.readableBytes) ?? ByteBufferView())
     }
   }
 
