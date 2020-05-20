@@ -22,7 +22,7 @@ extension Networking where Request == HTTPClient.Request {
     case .empty: body = nil
     }
     let url = components.url!
-    let request = try HTTPClient.Request(url: url, method: endpoint.method, body: body)
+    let request = try HTTPClient.Request(url: url, method: endpoint.method, headers: headers, body: body)
     return request
   }
 
