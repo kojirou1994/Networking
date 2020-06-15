@@ -29,7 +29,11 @@ public protocol CustomResponseBody {
 
 public extension Endpoint where RequestBody == EmptyBody {
   var body: EmptyBody { fatalError("Should never be called") }
-  var contentType: ContentType { .empty }
+  var contentType: ContentType { .none }
+}
+
+public extension Endpoint where ResponseBody == Void {
+  var acceptType: ContentType { .none }
 }
 
 public extension Endpoint where ResponseBody: Decodable {
@@ -38,4 +42,15 @@ public extension Endpoint where ResponseBody: Decodable {
 
 public struct EmptyBody: Codable {
   public init() {}
+}
+
+extension Endpoint {
+  @_transparent
+  public func check() {
+    #if DEBUG
+    if method == .GET, contentType != .none {
+      assertionFailure("GET request should have no body")
+    }
+    #endif
+  }
 }

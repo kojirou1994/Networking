@@ -5,27 +5,23 @@ import NIOFoundationCompat
 import FoundationNetworking
 #endif
 
+extension Endpoint {
+  func checkError() {
+
+  }
+}
+
 // MARK:  Default implementation for encoding
 extension Networking where Request == URLRequest {
 
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
-    var components = urlComponents
-    components.path = endpoint.path
-    if components.queryItems == nil {
-      components.queryItems = endpoint.queryItems
-    }
-    else {
-      components.queryItems?.append(contentsOf: endpoint.queryItems)
-    }
-    var request = URLRequest(url: components.url!)
+    endpoint.check()
+    var request = URLRequest(url: url(for: endpoint))
     request.httpMethod = endpoint.method.rawValue
-    request.setValue(endpoint.contentType.rawValue, forHTTPHeaderField: "Content-Type")
-    #if DEBUG
-    if endpoint.method == .GET, endpoint.contentType != .empty {
-      print("Invalid endpoint:\(endpoint), non-empty body in GET request!")
-    }
-    #endif
     if endpoint.method != .GET {
+      request.setValue(endpoint.contentType.rawValue, forHTTPHeaderField: "Content-Type")
+    }
+    if endpoint.acceptType != .none {
       request.setValue(endpoint.acceptType.rawValue, forHTTPHeaderField: "Accept")
     }
     commonHTTPHeaders.forEach { element in
@@ -36,7 +32,7 @@ extension Networking where Request == URLRequest {
     }
     switch endpoint.contentType {
     case .json: request.httpBody = try jsonEncoder.encode(endpoint.body)
-    case .empty: break
+    case .none: break
     }
     return request
   }
@@ -50,7 +46,7 @@ extension Networking where RawResponseBody == Data {
   where E: Endpoint, E.ResponseBody: Decodable {
     switch endpoint.acceptType {
     case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: body)
-    case .empty: fatalError()
+    case .none: fatalError()
     }
   }
 
@@ -66,7 +62,7 @@ extension Networking where RawResponseBody == ByteBuffer {
   where E: Endpoint, E.ResponseBody: Decodable {
     switch endpoint.acceptType {
     case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: body)
-    case .empty: fatalError()
+    case .none: fatalError()
     }
   }
 
@@ -81,7 +77,7 @@ extension Networking where RawResponseBody == ByteBufferView {
     where E: Endpoint, E.ResponseBody: Decodable {
       switch endpoint.acceptType {
       case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: .init(body))
-      case .empty: fatalError()
+      case .none: fatalError()
       }
   }
 

@@ -50,6 +50,12 @@ import Combine
 
 @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, *)
 extension URLSessionNetworking: PublishableNetworking {
+
+  @_transparent
+  public func rawPublisher<E>(_ endpoint: E) -> URLSession.DataTaskPublisher where E: Endpoint {
+    session.dataTaskPublisher(for: try! request(endpoint))
+  }
+
   public func publisher<E>(
     _ endpoint: E
   ) -> AnyPublisher<NetworkingResponse<Response, Result<E.ResponseBody, Error>>, Error> where E: Endpoint, E.ResponseBody: Decodable {
