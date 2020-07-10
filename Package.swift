@@ -26,7 +26,7 @@ let package = Package(
     .target(
       name: "AsyncHTTPClientNetworking",
       dependencies: [
-        "Networking",
+        .target(name: "Networking"),
         .product(name: "AsyncHTTPClient", package: "async-http-client")
     ]),
     .testTarget(

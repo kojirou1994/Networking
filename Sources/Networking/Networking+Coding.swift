@@ -5,12 +5,6 @@ import NIOFoundationCompat
 import FoundationNetworking
 #endif
 
-extension Endpoint {
-  func checkError() {
-
-  }
-}
-
 // MARK:  Default implementation for encoding
 extension Networking where Request == URLRequest {
 
@@ -42,7 +36,8 @@ extension Networking where Request == URLRequest {
 // MARK:  Default implementation for decoding
 extension Networking where RawResponseBody == Data {
 
-  @inlinable public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  @inlinable
+  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
   where E: Endpoint, E.ResponseBody: Decodable {
     switch endpoint.acceptType {
     case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: body)
@@ -50,7 +45,9 @@ extension Networking where RawResponseBody == Data {
     }
   }
 
-  @inlinable public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  @inlinable
+  public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  where E: Endpoint, E.ResponseBody: CustomResponseBody {
     try .init(body)
   }
 
@@ -58,7 +55,8 @@ extension Networking where RawResponseBody == Data {
 
 extension Networking where RawResponseBody == ByteBuffer {
 
-  @inlinable public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  @inlinable
+  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
   where E: Endpoint, E.ResponseBody: Decodable {
     switch endpoint.acceptType {
     case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: body)
@@ -66,14 +64,17 @@ extension Networking where RawResponseBody == ByteBuffer {
     }
   }
 
-  @inlinable public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  @inlinable
+  public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  where E: Endpoint, E.ResponseBody: CustomResponseBody {
     try .init(body.viewBytes(at: body.readerIndex, length: body.readerIndex) ?? ByteBufferView())
   }
 
 }
 extension Networking where RawResponseBody == ByteBufferView {
 
-  @inlinable public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  @inlinable
+  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
     where E: Endpoint, E.ResponseBody: Decodable {
       switch endpoint.acceptType {
       case .json: return try jsonDecoder.decode(E.ResponseBody.self, from: .init(body))
@@ -81,7 +82,9 @@ extension Networking where RawResponseBody == ByteBufferView {
       }
   }
 
-  @inlinable public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  @inlinable
+  public func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  where E: Endpoint, E.ResponseBody: CustomResponseBody {
     try .init(body)
   }
 

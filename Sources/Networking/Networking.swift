@@ -9,8 +9,8 @@ public protocol Networking {
   typealias RawResult = Result<NetworkingResponse<Response, RawResponseBody>, Error>
   typealias EndpointResult<E: Endpoint> = Result<NetworkingResponse<Response, Result<E.ResponseBody, Error>>, Error>
 
-  var urlComponents: URLComponents { get }
-  var commonHTTPHeaders: HTTPHeaders { get }
+  var urlComponents: URLComponents { get set }
+  var commonHTTPHeaders: HTTPHeaders { get set }
   var jsonDecoder: JSONDecoder { get }
   var jsonEncoder: JSONEncoder { get }
 
@@ -18,13 +18,14 @@ public protocol Networking {
 
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
 
-  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: Decodable
-  func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody
+  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  where E: Endpoint, E.ResponseBody: Decodable
 
-  func executeRaw(
-    _ request: Request,
-    completion: @escaping (RawResult) -> Void
-  )
+  func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
+  where E: Endpoint, E.ResponseBody: CustomResponseBody
+
+  func executeRaw(_ request: Request, completion: @escaping (RawResult) -> Void)
+
 }
 
 extension Networking {
@@ -35,10 +36,7 @@ extension Networking {
   public var jsonEncoder: JSONEncoder { .init() }
 
   @inlinable
-  public func executeRaw<E>(
-    _ endpoint: E,
-    completion: @escaping (RawResult) -> Void
-  ) where E: Endpoint {
+  public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) where E: Endpoint {
     do {
       executeRaw(try request(endpoint), completion: completion)
     } catch {
@@ -47,10 +45,8 @@ extension Networking {
   }
 
   @inlinable
-  public func execute<E>(
-    _ endpoint: E,
-    completion: @escaping (EndpointResult<E>) -> Void
-  ) where E: Endpoint, E.ResponseBody: Decodable {
+  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void)
+  where E: Endpoint, E.ResponseBody: Decodable {
     executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
         .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
@@ -59,10 +55,8 @@ extension Networking {
   }
 
   @inlinable
-  public func customExecute<E>(
-    _ endpoint: E,
-    completion: @escaping (EndpointResult<E>) -> Void
-  ) where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  public func customExecute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void)
+  where E: Endpoint, E.ResponseBody: CustomResponseBody {
     executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
         .init(response: rawResponse.response, body: .init(catching: {try self.customDecode(endpoint, body: rawResponse.body)}))

@@ -13,14 +13,14 @@ public protocol Endpoint {
   var contentType: ContentType { get }
   var queryItems: [URLQueryItem] { get }
   var headers: HTTPHeaders { get }
-  var acceptedStatusCode: Range<Int> { get }
+//  var acceptedStatusCode: Range<Int> { get }
 }
 
 public extension Endpoint {
   var method: HTTPMethod { .GET }
   var queryItems: [URLQueryItem] { [] }
   var headers: HTTPHeaders { .init() }
-  var acceptedStatusCode: Range<Int> { 200..<300 }
+//  var acceptedStatusCode: Range<Int> { 200..<300 }
 }
 
 public protocol CustomResponseBody {

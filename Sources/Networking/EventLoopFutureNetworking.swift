@@ -11,7 +11,8 @@ public protocol EventLoopFutureNetworking: Networking {
 extension EventLoopFutureNetworking {
 
   @inlinable
-  public func rawEventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>> where E : Endpoint {
+  public func rawEventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>>
+  where E : Endpoint {
     do {
       return rawEventLoopFuture(try request(endpoint))
     } catch {
@@ -25,7 +26,8 @@ extension EventLoopFutureNetworking {
   }
 
   @inlinable
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, Result<E.ResponseBody, Error>>> where E : Endpoint, E.ResponseBody: Decodable {
+  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, Result<E.ResponseBody, Error>>>
+  where E : Endpoint, E.ResponseBody: Decodable {
     rawEventLoopFuture(endpoint)
       .map { rawResponse in
         .init(response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
@@ -36,7 +38,8 @@ extension EventLoopFutureNetworking {
 extension EventLoopFutureNetworking where RawResponseBody: DataProtocol {
 
   @inlinable
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, Result<E.ResponseBody, Error>>> where E : Endpoint, E.ResponseBody: CustomResponseBody {
+  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<NetworkingResponse<Response, Result<E.ResponseBody, Error>>>
+  where E : Endpoint, E.ResponseBody: CustomResponseBody {
     rawEventLoopFuture(endpoint)
       .map { rawResponse in
         .init(response: rawResponse.response, body: .init{try self.customDecode(endpoint, body: rawResponse.body) })
