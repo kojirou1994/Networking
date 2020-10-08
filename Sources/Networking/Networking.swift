@@ -1,30 +1,40 @@
 @_exported import NIOHTTP1
 import Foundation
+import DictionaryCoding
 
 public protocol Networking {
   associatedtype Request
   associatedtype Response
+  associatedtype Task = Void
+
   associatedtype RawResponseBody = [UInt8]
 
-  typealias RawResult = Result<NetworkingResponse<Response, RawResponseBody>, Error>
-  typealias EndpointResult<E: Endpoint> = Result<NetworkingResponse<Response, Result<E.ResponseBody, Error>>, Error>
+  typealias RawResponse = NetworkingResponse<Response, RawResponseBody>
+  typealias RawResult = Result<RawResponse, Error>
 
-  var urlComponents: URLComponents { get set }
-  var commonHTTPHeaders: HTTPHeaders { get set }
+  typealias EndpointResponse<E: Endpoint> = NetworkingResponse<Response, Result<E.ResponseBody, Error>>
+  typealias EndpointResult<E: Endpoint> = Result<EndpointResponse<E>, Error>
+
+  var urlComponents: URLComponents { get }
+  var commonHTTPHeaders: HTTPHeaders { get }
+  /// Used when response body is Decodable and acceptType is json
   var jsonDecoder: JSONDecoder { get }
   var jsonEncoder: JSONEncoder { get }
-
-//  func validate(response: Response) throws
+  var dictionaryEncoder: DictionaryEncoder { get }
 
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
+  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable
+  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: CustomRequestBody
+  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: MultipartRequestBody
+  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: StreamRequestBody
 
-  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: Decodable
+  /// decode Decodable response
+  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: Decodable
+  /// decode custom response
+  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody
 
-  func customDecode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: CustomResponseBody
-
-  func executeRaw(_ request: Request, completion: @escaping (RawResult) -> Void)
+  @discardableResult
+  func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task
 
 }
 
@@ -36,32 +46,5 @@ extension Networking {
   public var jsonEncoder: JSONEncoder { .init() }
 
   @inlinable
-  public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) where E: Endpoint {
-    do {
-      executeRaw(try request(endpoint), completion: completion)
-    } catch {
-      completion(.failure(error))
-    }
-  }
-
-  @inlinable
-  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void)
-  where E: Endpoint, E.ResponseBody: Decodable {
-    executeRaw(endpoint) { result in
-      completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
-      })
-    }
-  }
-
-  @inlinable
-  public func customExecute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void)
-  where E: Endpoint, E.ResponseBody: CustomResponseBody {
-    executeRaw(endpoint) { result in
-      completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.customDecode(endpoint, body: rawResponse.body)}))
-      })
-    }
-  }
-
+  public var dictionaryEncoder: DictionaryEncoder { .init() }
 }

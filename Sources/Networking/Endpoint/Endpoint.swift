@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol Endpoint {
-  associatedtype RequestBody: Encodable = EmptyBody
+  associatedtype RequestBody = Void
   associatedtype ResponseBody = Void
   /// Note: path must begin with "/"
   var path: String { get }
@@ -17,31 +17,8 @@ public protocol Endpoint {
 }
 
 public extension Endpoint {
-  var method: HTTPMethod { .GET }
   var queryItems: [URLQueryItem] { [] }
   var headers: HTTPHeaders { .init() }
-//  var acceptedStatusCode: Range<Int> { 200..<300 }
-}
-
-public protocol CustomResponseBody {
-  init<D>(_ data: D) throws where D: DataProtocol
-}
-
-public extension Endpoint where RequestBody == EmptyBody {
-  var body: EmptyBody { fatalError("Should never be called") }
-  var contentType: ContentType { .none }
-}
-
-public extension Endpoint where ResponseBody == Void {
-  var acceptType: ContentType { .none }
-}
-
-public extension Endpoint where ResponseBody: Decodable {
-  var acceptType: ContentType { .json }
-}
-
-public struct EmptyBody: Codable {
-  public init() {}
 }
 
 extension Endpoint {
@@ -50,6 +27,9 @@ extension Endpoint {
     #if DEBUG
     if method == .GET, contentType != .none {
       assertionFailure("GET request should have no body")
+    }
+    if acceptType != .none {
+      assert(ResponseBody.self != Void.self, "if acceptType is none, ResponseBody must be Void.")
     }
     #endif
   }

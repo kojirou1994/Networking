@@ -7,3 +7,16 @@ public struct NetworkingResponse<R, Body> {
     self.body = body
   }
 }
+
+import Foundation
+
+extension NetworkingResponse: CustomStringConvertible where R == HTTPURLResponse {
+  public var description: String {
+    """
+    statusCode: \(response.statusCode)
+    headers:
+    \((response.allHeaderFields as! [String: String]).sorted { $0.key < $1.key}.map { "  \"\($0.key)\": \"\($0.value)\""}.joined(separator: "\n"))
+    body: \(body)
+    """
+  }
+}
