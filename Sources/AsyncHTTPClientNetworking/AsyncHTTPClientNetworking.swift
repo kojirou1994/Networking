@@ -13,7 +13,7 @@ where Request == HTTPClient.Request, Response == HTTPClient.Response, RawRespons
 extension AsyncHTTPClientNetworking {
 
   @inlinable
-  public func rawEventLoopFuture(_ request: Request) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>> {
+  public func eventLoopFuture(_ request: Request) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>> {
     client.execute(request: request).map { response in
       let body = response.body ?? ByteBuffer(.init())
       return .init(response: response,
