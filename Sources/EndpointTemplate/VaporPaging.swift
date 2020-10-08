@@ -1,4 +1,5 @@
 import Foundation
+import Networking
 
 public struct VaporPage<T>: Decodable where T: Decodable {
   public let items: [T]
@@ -27,6 +28,7 @@ where Base: Endpoint, Base.ResponseBody: Decodable {
   }
 
   public var body: Base.RequestBody { base.body }
+  public var method: HTTPMethod { base.method }
   public var path: String { base.path }
   public var contentType: ContentType { base.contentType }
   public var acceptType: ContentType { base.acceptType }
