@@ -12,11 +12,20 @@
       },
       {
         "package": "DictionaryCoding",
-        "repositoryURL": "https://github.com/elegantchaos/DictionaryCoding",
+        "repositoryURL": "https://github.com/elegantchaos/DictionaryCoding.git",
         "state": {
           "branch": null,
           "revision": "ae19e456bd550fed8f341e5bae4318333c53a5b4",
           "version": "1.0.9"
+        }
+      },
+      {
+        "package": "Multipart",
+        "repositoryURL": "https://github.com/kojirou1994/Multipart.git",
+        "state": {
+          "branch": null,
+          "revision": "72f6875a839774dd3d46a1a72b0cc93e7a3c977d",
+          "version": "0.2.0"
         }
       },
       {

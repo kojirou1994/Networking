@@ -42,25 +42,11 @@ extension Networking where Request == URLRequest {
   }
 
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: MultipartRequestBody {
-    fatalError("Unimplemented")
-    /*
-     var request = try _request(endpoint)
-
-     //    switch endpoint.contentType {
-     //    case .json: request.httpBody = try jsonEncoder.encode(endpoint.body)
-     //    case .none: break
-     //    case .wwwFormUrlEncoded:
-     //      let dictionary = try dictionaryEncoder.encode(endpoint.body) as [String: Any]
-     //      var queries = URLComponents()
-     //      queries.queryItems = dictionary.map { element in
-     //        .init(name: element.key, value: String(describing: element.value))
-     //      }
-     //
-     //      request.httpBody = .init(queries.query!.utf8)
-     //    }
-     return request
-     */
+    var request = try _request(endpoint)
+    request.setMultipartBody(endpoint.body.multipart)
+    return request
   }
+  
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: StreamRequestBody {
     fatalError("Unimplemented")
   }
@@ -69,7 +55,7 @@ extension Networking where Request == URLRequest {
     endpoint.check()
     var request = URLRequest(url: url(for: endpoint))
     request.httpMethod = endpoint.method.rawValue
-    if endpoint.method != .GET {
+    if endpoint.contentType != .none {
       request.setValue(endpoint.contentType.headerValue, forHTTPHeaderField: "Content-Type")
     }
     if endpoint.acceptType != .none {
