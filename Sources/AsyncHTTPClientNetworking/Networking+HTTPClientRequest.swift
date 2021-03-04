@@ -38,7 +38,7 @@ extension Networking where Request == HTTPClient.Request {
   func _request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
     endpoint.check()
     var headers = HTTPHeaders()
-    if endpoint.method != .GET {
+    if endpoint.contentType != .none {
       headers.add(name: "Content-Type", value: endpoint.contentType.headerValue)
     }
     if endpoint.acceptType != .none {
