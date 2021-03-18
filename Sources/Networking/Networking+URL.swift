@@ -1,8 +1,8 @@
 import Foundation
 
 extension Networking {
-  @_transparent
-  public func url<E: Endpoint>(for endpoint: E) -> URL {
+  
+  public func url<E: Endpoint>(for endpoint: E) throws -> URL {
     var components = urlComponents
     let path = endpoint.path
     if !path.isEmpty {
@@ -18,6 +18,9 @@ extension Networking {
     } else {
       components.queryItems?.append(contentsOf: endpoint.queryItems)
     }
-    return components.url!
+    guard let url = components.url else {
+      throw NetworkingError.invalidURL(components)
+    }
+    return url
   }
 }

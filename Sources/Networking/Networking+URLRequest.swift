@@ -53,7 +53,7 @@ extension Networking where Request == URLRequest {
 
   func _request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
     endpoint.check()
-    var request = URLRequest(url: url(for: endpoint))
+    var request = try URLRequest(url: url(for: endpoint))
     request.httpMethod = endpoint.method.rawValue
     if endpoint.contentType != .none {
       request.setValue(endpoint.contentType.headerValue, forHTTPHeaderField: "Content-Type")
