@@ -4,15 +4,24 @@ import NIOFoundationCompat
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
+import DictionaryCoding
 
-extension Networking {
-  public func wwwFormUrlEncodedBody<T: Encodable>(for body: T) throws -> String {
-    let dictionary = try dictionaryEncoder.encode(body) as [String: Any]
+extension DictionaryEncoder {
+  public func encodeWWWFormUrlEncodedBody<T: Encodable>(_ v: T) throws -> String {
+    let dictionary = try encode(v) as [String: Any]
+    guard !dictionary.isEmpty else {
+      return ""
+    }
     var queries = URLComponents()
     queries.queryItems = dictionary.map { element in
       .init(name: element.key, value: String(describing: element.value))
     }
     return queries.percentEncodedQuery!
+  }
+}
+extension Networking {
+  public func wwwFormUrlEncodedBody<T: Encodable>(for body: T) throws -> String {
+    try dictionaryEncoder.encodeWWWFormUrlEncodedBody(body)
   }
 }
 
