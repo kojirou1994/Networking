@@ -15,6 +15,16 @@ extension Networking where RawResponseBody == ${rawResponseBody} {
   @inlinable
   public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
   where E: Endpoint, E.ResponseBody: Decodable {
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      % if rawResponseBody == "ByteBuffer":
+      let bodyString = body.getString(at: body.readerIndex, length: body.readableBytes) ?? ""
+      % else:
+      let bodyString = String(decoding: body, as: UTF8.self)
+      % end
+      logger.debug("Decoding Response Body: \(bodyString)")
+    }
+    #endif
     switch endpoint.acceptType {
     case .json:
     % if rawResponseBody == "ByteBufferView":

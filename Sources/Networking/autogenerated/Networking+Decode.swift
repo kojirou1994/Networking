@@ -16,6 +16,12 @@ extension Networking where RawResponseBody == Data {
   @inlinable
   public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
   where E: Endpoint, E.ResponseBody: Decodable {
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      let bodyString = String(decoding: body, as: UTF8.self)
+      logger.debug("Decoding Response Body: \(bodyString)")
+    }
+    #endif
     switch endpoint.acceptType {
     case .json:
       return try jsonDecoder.decode(E.ResponseBody.self, from: body)
@@ -38,6 +44,12 @@ extension Networking where RawResponseBody == ByteBuffer {
   @inlinable
   public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
   where E: Endpoint, E.ResponseBody: Decodable {
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      let bodyString = body.getString(at: body.readerIndex, length: body.readableBytes) ?? ""
+      logger.debug("Decoding Response Body: \(bodyString)")
+    }
+    #endif
     switch endpoint.acceptType {
     case .json:
       return try jsonDecoder.decode(E.ResponseBody.self, from: body)
@@ -60,6 +72,12 @@ extension Networking where RawResponseBody == ByteBufferView {
   @inlinable
   public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
   where E: Endpoint, E.ResponseBody: Decodable {
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      let bodyString = String(decoding: body, as: UTF8.self)
+      logger.debug("Decoding Response Body: \(bodyString)")
+    }
+    #endif
     switch endpoint.acceptType {
     case .json:
       return try jsonDecoder.decode(E.ResponseBody.self, from: .init(body))
