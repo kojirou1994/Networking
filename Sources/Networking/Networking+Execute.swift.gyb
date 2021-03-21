@@ -9,6 +9,7 @@ import Foundation
 extension Networking {
 
   @inlinable
+  @discardableResult
   public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void {
     execute(try request(endpoint), completion: completion)
   }
@@ -16,12 +17,14 @@ extension Networking {
   % for requestBodyProtocol in requestBodyProtocols:
 
   @inlinable
+  @discardableResult
   public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody: ${requestBodyProtocol} {
     execute(try request(endpoint), completion: completion)
   }
   
   % for responseBodyProtocol in responseBodyProtocols:
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: ${requestBodyProtocol}, E.ResponseBody: ${responseBodyProtocol} {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -34,6 +37,7 @@ extension Networking {
 
   % for responseBodyProtocol in responseBodyProtocols:
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: ${responseBodyProtocol} {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in

@@ -50,6 +50,10 @@ let package = Package(
       name: "NetworkingTests",
       dependencies: [
         .target(name: "Networking")
-      ]),
+      ],
+      swiftSettings: [
+        SwiftSetting.define("NETWORKING_LOGGING")
+      ]
+    ),
   ]
 )

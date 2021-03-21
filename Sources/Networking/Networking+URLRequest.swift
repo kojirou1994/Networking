@@ -39,6 +39,11 @@ extension Networking where Request == URLRequest {
     case .wwwFormUrlEncoded:
       request.httpBody = .init(try wwwFormUrlEncodedBody(for: endpoint.body).utf8)
     }
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      logger.debug("Encoded URLRequest Body: \(String(decoding: request.httpBody!, as: UTF8.self))")
+    }
+    #endif
     return request
   }
 
@@ -46,6 +51,11 @@ extension Networking where Request == URLRequest {
     var request = try _request(endpoint)
     var body = Data()
     try endpoint.body.write(to: &body)
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      logger.debug("Custom URLRequest Body: \(body)")
+    }
+    #endif
     request.httpBody = body
     return request
   }
@@ -53,6 +63,11 @@ extension Networking where Request == URLRequest {
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: MultipartRequestBody {
     var request = try _request(endpoint)
     request.setMultipartBody(endpoint.body.multipart)
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      logger.debug("Multipart URLRequest Body: \(endpoint.body.multipart)")
+    }
+    #endif
     return request
   }
   
@@ -62,8 +77,26 @@ extension Networking where Request == URLRequest {
 
   func _request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
     endpoint.check()
-    var request = try URLRequest(url: url(for: endpoint))
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      logger.debug("Creating new URLRequest")
+    }
+    #endif
+    let url = try url(for: endpoint)
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      logger.debug("New URLRequest URL: \(url)")
+    }
+    #endif
+    var request = URLRequest(url: url)
+
     request.httpMethod = endpoint.method.rawValue
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      logger.debug("URLRequest Method: \(endpoint.method.rawValue)")
+    }
+    #endif
+
     if endpoint.contentType != .none {
       request.setValue(endpoint.contentType.headerValue, forHTTPHeaderField: "Content-Type")
     }
@@ -76,6 +109,11 @@ extension Networking where Request == URLRequest {
     endpoint.headers.forEach { element in
       request.addValue(element.value, forHTTPHeaderField: element.name)
     }
+    #if NETWORKING_LOGGING
+    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+      logger.debug("URLRequest Headers: \(request.allHTTPHeaderFields!)")
+    }
+    #endif
     return request
   }
 

@@ -21,6 +21,7 @@ extension URLSessionNetworking {
     false
   }
 
+  @discardableResult
   public func execute(_ request: URLRequest, completion: @escaping (RawResult) -> Void) -> Task {
     let task = session.dataTask(with: request) { data, response, error in
       guard error == nil else {

@@ -11,17 +11,20 @@ import Foundation
 extension Networking {
 
   @inlinable
+  @discardableResult
   public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void {
     execute(try request(endpoint), completion: completion)
   }
 
 
   @inlinable
+  @discardableResult
   public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable {
     execute(try request(endpoint), completion: completion)
   }
   
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -30,6 +33,7 @@ extension Networking {
     }
   }
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -39,11 +43,13 @@ extension Networking {
   }
 
   @inlinable
+  @discardableResult
   public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody: MultipartRequestBody {
     execute(try request(endpoint), completion: completion)
   }
   
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: MultipartRequestBody, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -52,6 +58,7 @@ extension Networking {
     }
   }
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: MultipartRequestBody, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -61,11 +68,13 @@ extension Networking {
   }
 
   @inlinable
+  @discardableResult
   public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody: StreamRequestBody {
     execute(try request(endpoint), completion: completion)
   }
   
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: StreamRequestBody, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -74,6 +83,7 @@ extension Networking {
     }
   }
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: StreamRequestBody, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -83,11 +93,13 @@ extension Networking {
   }
 
   @inlinable
+  @discardableResult
   public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody: CustomRequestBody {
     execute(try request(endpoint), completion: completion)
   }
   
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: CustomRequestBody, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -96,6 +108,7 @@ extension Networking {
     }
   }
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: CustomRequestBody, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -105,6 +118,7 @@ extension Networking {
   }
 
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
@@ -113,6 +127,7 @@ extension Networking {
     }
   }
   @inlinable
+  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in

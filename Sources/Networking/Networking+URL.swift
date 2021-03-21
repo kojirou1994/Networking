@@ -4,20 +4,30 @@ extension Networking {
   
   public func url<E: Endpoint>(for endpoint: E) throws -> URL {
     var components = urlComponents
-    let path = endpoint.path
-    if !path.isEmpty {
-      if components.path.isEmpty {
-        assert(path.first == "/", "path must begin with '/'.")
-        components.path = endpoint.path
-      } else {
-        components.path.append(endpoint.path)
+    
+    do {
+      let path = endpoint.path
+      if !path.isEmpty {
+        if components.path.isEmpty {
+          assert(path.first == "/", "path must begin with '/'.")
+          components.path = endpoint.path
+        } else {
+          components.path.append(endpoint.path)
+        }
       }
     }
-    if components.queryItems == nil {
-      components.queryItems = endpoint.queryItems
-    } else {
-      components.queryItems?.append(contentsOf: endpoint.queryItems)
+
+    do {
+      let queryItems = endpoint.queryItems
+      if !queryItems.isEmpty {
+        if components.queryItems == nil {
+          components.queryItems = queryItems
+        } else {
+          components.queryItems?.append(contentsOf: queryItems)
+        }
+      }
     }
+
     guard let url = components.url else {
       throw NetworkingError.invalidURL(components)
     }

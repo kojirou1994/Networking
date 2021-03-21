@@ -1,6 +1,7 @@
 @_exported import NIOHTTP1
 import Foundation
 import DictionaryCoding
+import os
 
 public protocol Networking {
   associatedtype Request
@@ -21,6 +22,11 @@ public protocol Networking {
   var jsonDecoder: JSONDecoder { get }
   var jsonEncoder: JSONEncoder { get }
   var dictionaryEncoder: DictionaryEncoder { get }
+
+  #if NETWORKING_LOGGING
+  @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+  var logger: Logger { get }
+  #endif
 
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable
