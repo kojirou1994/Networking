@@ -32,7 +32,11 @@ let package = Package(
         .product(name: "NIOHTTP1", package: "swift-nio"),
         .product(name: "DictionaryCoding", package: "DictionaryCoding"),
         .product(name: "Multipart", package: "Multipart")
-    ]),
+      ],
+      swiftSettings: [
+        SwiftSetting.define("NETWORKING_LOGGING")
+      ]
+    ),
     .target(
       name: "AsyncHTTPClientNetworking",
       dependencies: [
