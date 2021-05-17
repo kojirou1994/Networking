@@ -49,4 +49,27 @@ extension URLSessionNetworking {
     }
     return task
   }
+
+  public func executeAndWait(_ request: Request, taskHandler: ((Task) -> Void)?) -> RawResult {
+    var result: RawResult!
+    var taskFinished = false
+    let condition = NSCondition()
+    condition.lock()
+
+    let task = execute(request) { serverResult in
+      condition.lock()
+      result = serverResult
+      taskFinished = true
+      condition.signal()
+      condition.unlock()
+    }
+    taskHandler?(task)
+    
+    while !taskFinished {
+      condition.wait()
+    }
+    condition.unlock()
+
+    return result
+  }
 }

@@ -13,4 +13,11 @@ extension EventLoopFutureNetworking {
   public func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task {
     eventLoopFuture(request).whenComplete(completion)
   }
+
+  @inlinable
+  public func executeAndWait(_ request: Request, taskHandler: ((Task) -> Void)?) -> RawResult {
+    .init {
+      try eventLoopFuture(request).wait()
+    }
+  }
 }

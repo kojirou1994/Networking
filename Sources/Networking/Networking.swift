@@ -42,6 +42,7 @@ public protocol Networking {
   @discardableResult
   func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task
 
+  func executeAndWait(_ request: Request, taskHandler: ((Task) -> Void)?) -> RawResult
 }
 
 extension Networking {
