@@ -14,6 +14,9 @@ let package = Package(
     .library(
       name: "AsyncHTTPClientNetworking",
       targets: ["AsyncHTTPClientNetworking"]),
+    .library(
+      name: "NetworkingPublisher",
+      targets: ["NetworkingPublisher"]),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
