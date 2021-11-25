@@ -1,8 +1,7 @@
-import Foundation
 @_exported import Multipart
 
 public protocol CustomRequestBody {
-  func write<D>(to data: inout D) throws where D: DataProtocol
+  func write<D: MutableCollection & RandomAccessCollection & RangeReplaceableCollection>(to data: inout D) throws where D.Element == UInt8
 }
 
 public protocol MultipartRequestBody {
