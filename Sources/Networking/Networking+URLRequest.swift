@@ -27,9 +27,36 @@ extension Networking {
 
 // MARK:  Default implementation for encoding
 extension Networking where Request == URLRequest {
+
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
-    try _request(endpoint)
+    var request = try _request(endpoint)
+    guard E.RequestBody.self != Void.self else {
+      return request
+    }
+    if let custom = endpoint.body as? CustomRequestBody {
+      var body = Data()
+      try custom.write(to: &body)
+      #if NETWORKING_LOGGING
+      if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+        logger.debug("Custom URLRequest Body")
+      }
+      #endif
+      request.httpBody = body
+    } else if let multipart = endpoint.body as? MultipartRequestBody {
+      request.setMultipartBody(multipart.multipart)
+      #if NETWORKING_LOGGING
+      if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+        logger.debug("Multipart URLRequest Body")
+      }
+      #endif
+    } else if let stream = endpoint.body as? StreamRequestBody {
+      fatalError("Unimplemented stream \(stream)")
+    } else {
+      fatalError("Unsupported RequestBody type: \(E.self)")
+    }
+    return request
   }
+
 
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable {
     var request = try _request(endpoint)
@@ -45,34 +72,6 @@ extension Networking where Request == URLRequest {
     }
     #endif
     return request
-  }
-
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: CustomRequestBody {
-    var request = try _request(endpoint)
-    var body = Data()
-    try endpoint.body.write(to: &body)
-    #if NETWORKING_LOGGING
-    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
-      logger.debug("Custom URLRequest Body: \(body)")
-    }
-    #endif
-    request.httpBody = body
-    return request
-  }
-
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: MultipartRequestBody {
-    var request = try _request(endpoint)
-    request.setMultipartBody(endpoint.body.multipart)
-    #if NETWORKING_LOGGING
-    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
-      logger.debug("Multipart URLRequest Body: \(endpoint.body.multipart)")
-    }
-    #endif
-    return request
-  }
-  
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: StreamRequestBody {
-    fatalError("Unimplemented")
   }
 
   func _request<E>(_ endpoint: E) throws -> Request where E: Endpoint {

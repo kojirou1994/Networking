@@ -30,9 +30,6 @@ public protocol Networking {
 
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable
-  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: CustomRequestBody
-  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: MultipartRequestBody
-  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: StreamRequestBody
 
   /// decode Decodable response
   func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: Decodable
