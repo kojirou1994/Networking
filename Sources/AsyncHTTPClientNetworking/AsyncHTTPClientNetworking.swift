@@ -6,7 +6,7 @@ import NIO
 public protocol AsyncHTTPClientNetworking: EventLoopFutureNetworking
 where Request == HTTPClient.Request, Response == HTTPClient.Response, RawResponseBody == ByteBufferView {
 
-  var client: HTTPClient { get }
+  var http: HTTPClient { get }
 
 }
 
@@ -26,4 +26,7 @@ extension AsyncHTTPClientNetworking {
     client.eventLoopGroup.next()
   }
 
+  @available(* ,renamed: "http")
+  @inlinable
+  var client: HTTPClient { http }
 }
