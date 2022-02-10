@@ -1,4 +1,4 @@
-import Foundation
+@_exported import struct Foundation.URLQueryItem
 
 public protocol Endpoint {
   associatedtype RequestBody = Void
@@ -22,7 +22,7 @@ public extension Endpoint {
 }
 
 extension Endpoint {
-  @_transparent
+
   public func check() {
     #if DEBUG
     if method == .GET, contentType != .none {
