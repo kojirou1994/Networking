@@ -3,8 +3,9 @@ import Foundation
 @_exported import AsyncHTTPClient
 import NIO
 
-public protocol AsyncHTTPClientNetworking: EventLoopFutureNetworking
-where Request == HTTPClient.Request, Response == HTTPClient.Response, RawResponseBody == ByteBufferView {
+public protocol AsyncHTTPClientNetworking: EventLoopFutureNetworking, StreamNetworking
+where Request == HTTPClient.Request, Response == HTTPClient.Response, RawResponseBody == ByteBufferView,
+      StreamTask == HTTPClient.Task<Void> {
 
   var http: HTTPClient { get }
 

@@ -1,6 +1,7 @@
 import Foundation
 import NIOFoundationCompat
 import NIO
+import AsyncHTTPClient
 
 extension Networking where Request == HTTPClient.Request {
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
@@ -48,6 +49,44 @@ extension Networking where Request == HTTPClient.Request {
     headers.add(contentsOf: endpoint.headers)
 
     return try HTTPClient.Request(url: url(for: endpoint), method: endpoint.method, headers: headers)
+  }
+
+}
+
+extension AsyncHTTPClientNetworking where Request == HTTPClient.Request {
+  public func stream<E>(_ endpoint: E, receiveCompletion: @escaping (Result<Void, Error>) -> Void, receiveValue: @escaping (RawResponseBody) -> Void) throws -> StreamTask where E: Endpoint {
+    let request = try request(endpoint)
+    return http.execute(request: request, delegate: StreamDelegate(receiveCompletion: receiveCompletion, receiveValue: receiveValue), deadline: nil)
+  }
+}
+
+final class StreamDelegate: HTTPClientResponseDelegate {
+  internal init(receiveCompletion: @escaping (Result<Void, Error>) -> Void, receiveValue: @escaping (ByteBufferView) -> Void) {
+    self.receiveCompletion = receiveCompletion
+    self.receiveValue = receiveValue
+  }
+
+  func didFinishRequest(task: HTTPClient.Task<Void>) throws -> Void {
+    if let error = error {
+      receiveCompletion(.failure(error))
+    } else {
+      receiveCompletion(.success(()))
+    }
+  }
+
+  let receiveCompletion: (Result<Void, Error>) -> Void
+  let receiveValue: (ByteBufferView) -> Void
+  var error: Error?
+
+  typealias Response = Void
+
+  func didReceiveError(task: HTTPClient.Task<Void>, _ error: Error) {
+    self.error = error
+  }
+
+  func didReceiveBodyPart(task: HTTPClient.Task<Void>, _ buffer: ByteBuffer) -> EventLoopFuture<Void> {
+    receiveValue(.init(buffer))
+    return task.eventLoop.makeSucceededFuture(())
   }
 
 }
