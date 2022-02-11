@@ -42,7 +42,7 @@ extension URLSessionNetworking {
         logger.debug("Response body: \(data?.count ?? 0) bytes")
       }
       #endif
-      completion(.success(.init(response: res, body: data ?? Data())))
+      completion(.success((response: res, body: data ?? Data())))
     }
     if autoResume {
       task.resume()

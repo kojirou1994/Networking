@@ -28,7 +28,7 @@ extension Networking {
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
       })
     }
   }
@@ -37,7 +37,7 @@ extension Networking {
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
       })
     }
   }
@@ -47,17 +47,19 @@ extension Networking {
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
       })
     }
   }
+
   @inlinable
   @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
       })
     }
   }
+
 }

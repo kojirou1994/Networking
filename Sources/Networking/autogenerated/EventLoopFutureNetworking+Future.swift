@@ -33,7 +33,7 @@ extension EventLoopFutureNetworking {
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: Decodable {
     eventLoopFutureRaw(endpoint)
       .map { rawResponse in
-        .init(response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
+        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
     }
   }
 
@@ -41,7 +41,7 @@ extension EventLoopFutureNetworking {
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: CustomResponseBody {
     eventLoopFutureRaw(endpoint)
       .map { rawResponse in
-        .init(response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
+        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
     }
   }
 
@@ -49,7 +49,7 @@ extension EventLoopFutureNetworking {
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody == Void, E.ResponseBody: Decodable {
     eventLoopFutureRaw(endpoint)
       .map { rawResponse in
-        .init(response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
+        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
     }
   }
   
@@ -57,7 +57,7 @@ extension EventLoopFutureNetworking {
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody == Void, E.ResponseBody: CustomResponseBody {
     eventLoopFutureRaw(endpoint)
       .map { rawResponse in
-        .init(response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
+        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
     }
   }
   

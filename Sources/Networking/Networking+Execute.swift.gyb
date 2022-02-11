@@ -28,7 +28,7 @@ extension Networking {
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: ${requestBodyProtocol}, E.ResponseBody: ${responseBodyProtocol} {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
       })
     }
   }
@@ -41,9 +41,10 @@ extension Networking {
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: ${responseBodyProtocol} {
     try executeRaw(endpoint) { result in
       completion(result.map { rawResponse in
-        .init(response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
+        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
       })
     }
   }
+
   % end
 }

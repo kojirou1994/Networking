@@ -5,7 +5,22 @@ import AsyncHTTPClient
 
 extension Networking where Request == HTTPClient.Request {
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
-    try _request(endpoint)
+    var request = try _request(endpoint)
+    guard E.RequestBody.self != Void.self else {
+      return request
+    }
+    if let custom = endpoint.body as? CustomRequestBody {
+      var body = ByteBufferView()
+      try custom.write(to: &body)
+      request.body = .byteBuffer(ByteBuffer(body))
+    } else if let multipart = endpoint.body as? MultipartRequestBody {
+      fatalError("Unimplemented multipart \(multipart)")
+    } else if let stream = endpoint.body as? StreamRequestBody {
+      fatalError("Unimplemented stream \(stream)")
+    } else {
+      fatalError("Unsupported RequestBody type: \(E.self)")
+    }
+    return request
   }
 
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable {
@@ -19,21 +34,6 @@ extension Networking where Request == HTTPClient.Request {
       request.body = .string(try wwwFormUrlEncodedBody(for: endpoint.body))
     }
     return request
-  }
-
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: CustomRequestBody {
-    var request = try _request(endpoint)
-    var body = ByteBufferView()
-    try endpoint.body.write(to: &body)
-    request.body = .byteBuffer(ByteBuffer(body))
-    return request
-  }
-
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: MultipartRequestBody {
-    fatalError("Unimplemented")
-  }
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: StreamRequestBody {
-    fatalError("Unimplemented")
   }
 
   func _request<E>(_ endpoint: E) throws -> Request where E: Endpoint {

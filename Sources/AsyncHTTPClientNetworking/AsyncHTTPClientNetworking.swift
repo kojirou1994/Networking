@@ -17,7 +17,7 @@ extension AsyncHTTPClientNetworking {
   public func eventLoopFuture(_ request: Request) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>> {
     client.execute(request: request).map { response in
       let body = response.body ?? ByteBuffer(.init())
-      return .init(response: response,
+      return (response: response,
                    body: body.viewBytes(at: body.readerIndex, length: body.readableBytes) ?? ByteBufferView())
     }
   }
