@@ -14,14 +14,14 @@ import NIOFoundationCompat
 extension Networking where RawResponseBody == Data {
 
   @inlinable
-  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable {
+  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = String(decoding: body, as: UTF8.self)
       logger.debug("Decoding Response Body: \(bodyString)")
     }
     #endif
-    switch endpoint.acceptType {
+    switch contentType {
     case .json:
       return try jsonDecoder.decode(ResponseBody.self, from: body)
     case .none: fatalError("Should never be called")
@@ -31,7 +31,7 @@ extension Networking where RawResponseBody == Data {
   }
 
   @inlinable
-  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody {
+  public func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody {
     try .init(body)
   }
 
@@ -40,14 +40,14 @@ extension Networking where RawResponseBody == Data {
 extension Networking where RawResponseBody == ByteBuffer {
 
   @inlinable
-  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable {
+  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = body.getString(at: body.readerIndex, length: body.readableBytes) ?? ""
       logger.debug("Decoding Response Body: \(bodyString)")
     }
     #endif
-    switch endpoint.acceptType {
+    switch contentType {
     case .json:
       return try jsonDecoder.decode(ResponseBody.self, from: body)
     case .none: fatalError("Should never be called")
@@ -57,7 +57,7 @@ extension Networking where RawResponseBody == ByteBuffer {
   }
 
   @inlinable
-  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody {
+  public func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody {
     try .init(body.viewBytes(at: body.readerIndex, length: body.readerIndex) ?? ByteBufferView())
   }
 
@@ -66,14 +66,14 @@ extension Networking where RawResponseBody == ByteBuffer {
 extension Networking where RawResponseBody == ByteBufferView {
 
   @inlinable
-  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable {
+  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = String(decoding: body, as: UTF8.self)
       logger.debug("Decoding Response Body: \(bodyString)")
     }
     #endif
-    switch endpoint.acceptType {
+    switch contentType {
     case .json:
       return try jsonDecoder.decode(ResponseBody.self, from: .init(body))
     case .none: fatalError("Should never be called")
@@ -83,7 +83,7 @@ extension Networking where RawResponseBody == ByteBufferView {
   }
 
   @inlinable
-  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody {
+  public func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody {
     try .init(body)
   }
 

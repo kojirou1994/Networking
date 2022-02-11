@@ -37,7 +37,10 @@ extension EventLoopFutureNetworking {
         return rawResponse
       }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+        (
+        rawResponse.response,
+        .init { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) }
+        )
       }
   }
 
@@ -49,7 +52,10 @@ extension EventLoopFutureNetworking {
         return rawResponse
       }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+        (
+        rawResponse.response,
+        .init { try self.decode(body: rawResponse.body) }
+        )
       }
   }
 
@@ -61,7 +67,10 @@ extension EventLoopFutureNetworking {
         return rawResponse
       }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+        (
+        rawResponse.response,
+        .init { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) }
+        )
       }
   }
   
@@ -73,7 +82,10 @@ extension EventLoopFutureNetworking {
         return rawResponse
       }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+        (
+        rawResponse.response,
+        .init { try self.decode(body: rawResponse.body) }
+        )
       }
   }
   

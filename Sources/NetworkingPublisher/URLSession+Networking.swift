@@ -26,7 +26,7 @@ extension PublishableURLSessionNetworking {
     session.dataTaskPublisher(for: try! request(endpoint))
       .tryMap { output in
         let res = output.response as! HTTPURLResponse
-        return (response: res, body: .init{try self.decode(endpoint, body: output.data)})
+        return (response: res, body: .init{try self.decode(contentType: endpoint.acceptType, body: output.data)})
       }
       .eraseToAnyPublisher()
   }

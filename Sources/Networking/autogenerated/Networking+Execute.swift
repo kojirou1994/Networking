@@ -32,7 +32,7 @@ extension Networking {
           try endpoint.validate(networking: self, response: rawResponse)
           completion(.success((
             rawResponse.response,
-            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+            .init(catching: { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) })
           )))
         } catch {
           completion(.failure(error))
@@ -53,7 +53,7 @@ extension Networking {
           try endpoint.validate(networking: self, response: rawResponse)
           completion(.success((
             rawResponse.response,
-            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+            .init(catching: { try self.decode(body: rawResponse.body) })
           )))
         } catch {
           completion(.failure(error))
@@ -74,7 +74,7 @@ extension Networking {
           try endpoint.validate(networking: self, response: rawResponse)
           completion(.success((
             rawResponse.response,
-            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+            .init(catching: { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) })
           )))
         } catch {
           completion(.failure(error))
@@ -95,7 +95,7 @@ extension Networking {
           try endpoint.validate(networking: self, response: rawResponse)
           completion(.success((
             rawResponse.response,
-            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+            .init(catching: { try self.decode(body: rawResponse.body) })
           )))
         } catch {
           completion(.failure(error))
