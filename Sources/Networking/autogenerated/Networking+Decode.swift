@@ -14,8 +14,7 @@ import NIOFoundationCompat
 extension Networking where RawResponseBody == Data {
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: Decodable {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = String(decoding: body, as: UTF8.self)
@@ -24,7 +23,7 @@ extension Networking where RawResponseBody == Data {
     #endif
     switch endpoint.acceptType {
     case .json:
-      return try jsonDecoder.decode(E.ResponseBody.self, from: body)
+      return try jsonDecoder.decode(ResponseBody.self, from: body)
     case .none: fatalError("Should never be called")
     case .wwwFormUrlEncoded:
       fatalError("Unsupported")
@@ -32,8 +31,7 @@ extension Networking where RawResponseBody == Data {
   }
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody {
     try .init(body)
   }
 
@@ -42,8 +40,7 @@ extension Networking where RawResponseBody == Data {
 extension Networking where RawResponseBody == ByteBuffer {
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: Decodable {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = body.getString(at: body.readerIndex, length: body.readableBytes) ?? ""
@@ -52,7 +49,7 @@ extension Networking where RawResponseBody == ByteBuffer {
     #endif
     switch endpoint.acceptType {
     case .json:
-      return try jsonDecoder.decode(E.ResponseBody.self, from: body)
+      return try jsonDecoder.decode(ResponseBody.self, from: body)
     case .none: fatalError("Should never be called")
     case .wwwFormUrlEncoded:
       fatalError("Unsupported")
@@ -60,8 +57,7 @@ extension Networking where RawResponseBody == ByteBuffer {
   }
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody {
     try .init(body.viewBytes(at: body.readerIndex, length: body.readerIndex) ?? ByteBufferView())
   }
 
@@ -70,8 +66,7 @@ extension Networking where RawResponseBody == ByteBuffer {
 extension Networking where RawResponseBody == ByteBufferView {
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: Decodable {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = String(decoding: body, as: UTF8.self)
@@ -80,7 +75,7 @@ extension Networking where RawResponseBody == ByteBufferView {
     #endif
     switch endpoint.acceptType {
     case .json:
-      return try jsonDecoder.decode(E.ResponseBody.self, from: .init(body))
+      return try jsonDecoder.decode(ResponseBody.self, from: .init(body))
     case .none: fatalError("Should never be called")
     case .wwwFormUrlEncoded:
       fatalError("Unsupported")
@@ -88,8 +83,7 @@ extension Networking where RawResponseBody == ByteBufferView {
   }
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody {
     try .init(body)
   }
 

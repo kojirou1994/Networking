@@ -13,8 +13,7 @@ import NIOFoundationCompat
 extension Networking where RawResponseBody == ${rawResponseBody} {
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: Decodable {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       % if rawResponseBody == "ByteBuffer":
@@ -28,9 +27,9 @@ extension Networking where RawResponseBody == ${rawResponseBody} {
     switch endpoint.acceptType {
     case .json:
     % if rawResponseBody == "ByteBufferView":
-      return try jsonDecoder.decode(E.ResponseBody.self, from: .init(body))
+      return try jsonDecoder.decode(ResponseBody.self, from: .init(body))
     % else:
-      return try jsonDecoder.decode(E.ResponseBody.self, from: body)
+      return try jsonDecoder.decode(ResponseBody.self, from: body)
     % end
     case .none: fatalError("Should never be called")
     case .wwwFormUrlEncoded:
@@ -39,8 +38,7 @@ extension Networking where RawResponseBody == ${rawResponseBody} {
   }
 
   @inlinable
-  public func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody
-  where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  public func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody {
     % if rawResponseBody == "ByteBuffer":
     try .init(body.viewBytes(at: body.readerIndex, length: body.readerIndex) ?? ByteBufferView())
     % else:

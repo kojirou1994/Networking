@@ -32,9 +32,9 @@ public protocol Networking {
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable
 
   /// decode Decodable response
-  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: Decodable
+  func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: Decodable
   /// decode custom response
-  func decode<E>(_ endpoint: E, body: RawResponseBody) throws -> E.ResponseBody where E: Endpoint, E.ResponseBody: CustomResponseBody
+  func decode<E, ResponseBody>(_ endpoint: E, body: RawResponseBody) throws -> ResponseBody where E: Endpoint, ResponseBody: CustomResponseBody
 
   @discardableResult
   func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task
