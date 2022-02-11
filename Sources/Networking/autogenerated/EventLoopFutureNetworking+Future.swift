@@ -12,7 +12,7 @@ import NIO
 extension EventLoopFutureNetworking {
 
   @inlinable
-  public func eventLoopFutureRaw<E>(_ endpoint: E) -> EventLoopFuture<RawResponse> where E: Endpoint, E.RequestBody == Void {
+  public func eventLoopFutureRaw<E>(_ endpoint: E) -> EventLoopFuture<RawResponse> where E: Endpoint {
     do {
       return eventLoopFuture(try request(endpoint))
     } catch {
