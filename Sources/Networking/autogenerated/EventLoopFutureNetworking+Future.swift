@@ -32,33 +32,49 @@ extension EventLoopFutureNetworking {
   @inlinable
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: Decodable {
     eventLoopFutureRaw(endpoint)
+      .flatMapThrowing { rawResponse -> RawResponse in
+        try endpoint.validate(networking: self, response: rawResponse)
+        return rawResponse
+      }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
-    }
+        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+      }
   }
 
   @inlinable
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: CustomResponseBody {
     eventLoopFutureRaw(endpoint)
+      .flatMapThrowing { rawResponse -> RawResponse in
+        try endpoint.validate(networking: self, response: rawResponse)
+        return rawResponse
+      }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
-    }
+        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+      }
   }
 
   @inlinable
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody == Void, E.ResponseBody: Decodable {
+  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.ResponseBody: Decodable {
     eventLoopFutureRaw(endpoint)
+      .flatMapThrowing { rawResponse -> RawResponse in
+        try endpoint.validate(networking: self, response: rawResponse)
+        return rawResponse
+      }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
-    }
+        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+      }
   }
   
   @inlinable
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.RequestBody == Void, E.ResponseBody: CustomResponseBody {
+  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.ResponseBody: CustomResponseBody {
     eventLoopFutureRaw(endpoint)
+      .flatMapThrowing { rawResponse -> RawResponse in
+        try endpoint.validate(networking: self, response: rawResponse)
+        return rawResponse
+      }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init{try self.decode(endpoint, body: rawResponse.body)})
-    }
+        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+      }
   }
   
 }

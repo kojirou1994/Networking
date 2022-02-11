@@ -12,10 +12,9 @@ extension Networking {
 
   @inlinable
   @discardableResult
-  public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void {
+  public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint {
     execute(try request(endpoint), completion: completion)
   }
-
 
   @inlinable
   @discardableResult
@@ -27,38 +26,83 @@ extension Networking {
   @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
-      completion(result.map { rawResponse in
-        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
-      })
+      switch result {
+      case .success(let rawResponse):
+        do {
+          try endpoint.validate(networking: self, response: rawResponse)
+          completion(.success((
+            rawResponse.response,
+            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+          )))
+        } catch {
+          completion(.failure(error))
+        }
+      case .failure(let error):
+        completion(.failure(error))
+      }
     }
   }
+
   @inlinable
   @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
-      completion(result.map { rawResponse in
-        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
-      })
+      switch result {
+      case .success(let rawResponse):
+        do {
+          try endpoint.validate(networking: self, response: rawResponse)
+          completion(.success((
+            rawResponse.response,
+            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+          )))
+        } catch {
+          completion(.failure(error))
+        }
+      case .failure(let error):
+        completion(.failure(error))
+      }
     }
   }
 
   @inlinable
   @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: Decodable {
+  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
-      completion(result.map { rawResponse in
-        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
-      })
+      switch result {
+      case .success(let rawResponse):
+        do {
+          try endpoint.validate(networking: self, response: rawResponse)
+          completion(.success((
+            rawResponse.response,
+            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+          )))
+        } catch {
+          completion(.failure(error))
+        }
+      case .failure(let error):
+        completion(.failure(error))
+      }
     }
   }
 
   @inlinable
   @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody == Void, E.ResponseBody: CustomResponseBody {
+  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
-      completion(result.map { rawResponse in
-        (response: rawResponse.response, body: .init(catching: {try self.decode(endpoint, body: rawResponse.body)}))
-      })
+      switch result {
+      case .success(let rawResponse):
+        do {
+          try endpoint.validate(networking: self, response: rawResponse)
+          completion(.success((
+            rawResponse.response,
+            .init(catching: { try self.decode(endpoint, body: rawResponse.body) })
+          )))
+        } catch {
+          completion(.failure(error))
+        }
+      case .failure(let error):
+        completion(.failure(error))
+      }
     }
   }
 

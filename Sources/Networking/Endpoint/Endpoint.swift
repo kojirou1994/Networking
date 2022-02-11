@@ -13,12 +13,18 @@ public protocol Endpoint {
   var contentType: ContentType { get }
   var queryItems: [URLQueryItem] { get }
   var headers: HTTPHeaders { get }
-//  var acceptedStatusCode: Range<Int> { get }
+  func validate<N: Networking>(networking: N, response: N.RawResponse) throws
 }
 
 public extension Endpoint {
+  @inlinable
   var queryItems: [URLQueryItem] { [] }
+
+  @inlinable
   var headers: HTTPHeaders { .init() }
+
+  @inlinable
+  func validate<N: Networking>(networking: N, response: N.RawResponse) throws {}
 }
 
 extension Endpoint {
