@@ -37,7 +37,14 @@ extension EventLoopFutureNetworking {
         return rawResponse
       }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+        (
+        rawResponse.response,
+        % if responseBodyProtocol == "CustomResponseBody":
+        .init { try self.decode(body: rawResponse.body) }
+        % else:
+        .init { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) }
+        % end
+        )
       }
   }
 
@@ -52,7 +59,14 @@ extension EventLoopFutureNetworking {
         return rawResponse
       }
       .map { rawResponse in
-        (response: rawResponse.response, body: .init { try self.decode(endpoint, body: rawResponse.body) })
+        (
+        rawResponse.response,
+        % if responseBodyProtocol == "CustomResponseBody":
+        .init { try self.decode(body: rawResponse.body) }
+        % else:
+        .init { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) }
+        % end
+        )
       }
   }
   
