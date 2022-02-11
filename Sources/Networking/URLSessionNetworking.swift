@@ -3,6 +3,21 @@ import Foundation
 import FoundationNetworking
 #endif
 
+extension HTTPURLResponse: ResponseProtocol {
+  public var status: HTTPResponseStatus {
+    .init(statusCode: statusCode)
+  }
+
+  public var headers: HTTPHeaders {
+    var result = HTTPHeaders()
+    allHeaderFields.forEach { kv in
+      result.add(name: kv.key as! String, value: kv.value as! String)
+    }
+    return result
+  }
+
+}
+
 public protocol URLSessionNetworking: Networking
 where Request == URLRequest, Response == HTTPURLResponse,
       RawResponseBody == Data, Task == URLSessionTask {
