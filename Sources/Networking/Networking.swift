@@ -5,7 +5,7 @@ import os
 
 public protocol Networking {
   associatedtype Request
-  associatedtype Response
+  associatedtype Response: ResponseProtocol
   associatedtype Task = Void
 
   associatedtype RawResponseBody = [UInt8]
@@ -38,6 +38,10 @@ public protocol Networking {
 
   @discardableResult
   func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task
+
+//  #if compiler(>=5.5.2)
+//  func execute(_ request: Request) async throws -> RawResponse
+//  #endif
 
   func executeAndWait(_ request: Request, taskHandler: ((Task) -> Void)?) -> RawResult
 }
