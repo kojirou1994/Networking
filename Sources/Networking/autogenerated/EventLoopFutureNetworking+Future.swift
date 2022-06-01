@@ -20,7 +20,6 @@ extension EventLoopFutureNetworking {
     }
   }
 
-  @inlinable
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.ResponseBody: Decodable {
     eventLoopFutureRaw(endpoint)
       .flatMapThrowing { rawResponse -> EndpointResponse<E> in
@@ -32,7 +31,6 @@ extension EventLoopFutureNetworking {
       }
   }
   
-  @inlinable
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.ResponseBody: CustomResponseBody {
     eventLoopFutureRaw(endpoint)
       .flatMapThrowing { rawResponse -> EndpointResponse<E> in

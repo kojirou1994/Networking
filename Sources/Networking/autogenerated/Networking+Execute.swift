@@ -16,7 +16,6 @@ extension Networking {
     execute(try request(endpoint), completion: completion)
   }
 
-  @inlinable
   @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
@@ -37,7 +36,6 @@ extension Networking {
     }
   }
 
-  @inlinable
   @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: CustomResponseBody {
     try executeRaw(endpoint) { result in
