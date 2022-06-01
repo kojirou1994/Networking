@@ -29,7 +29,7 @@ extension Networking {
 extension Networking where Request == URLRequest {
 
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
-    var request = try _request(endpoint)
+    var request = try baseRequest(endpoint)
     guard E.RequestBody.self != Void.self else {
       return request
     }
@@ -57,9 +57,8 @@ extension Networking where Request == URLRequest {
     return request
   }
 
-
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable {
-    var request = try _request(endpoint)
+    var request = try baseRequest(endpoint)
     switch endpoint.contentType {
     case .json: request.httpBody = try jsonEncoder.encode(endpoint.body)
     case .none: break // Already checked
@@ -74,7 +73,7 @@ extension Networking where Request == URLRequest {
     return request
   }
 
-  func _request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
+  func baseRequest<E>(_ endpoint: E) throws -> Request where E: Endpoint {
     endpoint.check()
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
