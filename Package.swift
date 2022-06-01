@@ -1,11 +1,14 @@
-// swift-tools-version:5.2
+// swift-tools-version: 5.6
 
 import PackageDescription
 
 let package = Package(
   name: "Networking",
   platforms: [
-    .macOS(.v10_12), .iOS(.v10), .tvOS(.v10)
+    .macOS(.v10_15),
+    .iOS(.v13),
+    .tvOS(.v13),
+    .watchOS(.v6),
   ],
   products: [
     .library(
@@ -34,18 +37,18 @@ let package = Package(
         .product(name: "DictionaryCoding", package: "DictionaryCoding"),
         .product(name: "AnyEncodable", package: "AnyEncodable"),
         .product(name: "Multipart", package: "Multipart"),
-    ]),
+      ]),
     .target(
       name: "AsyncHTTPClientNetworking",
       dependencies: [
         .target(name: "Networking"),
         .product(name: "AsyncHTTPClient", package: "async-http-client")
-    ]),
+      ]),
     .target(
       name: "EndpointTemplate",
       dependencies: [
         .target(name: "Networking")
-    ]),
+      ]),
     .target(
       name: "NetworkingPublisher",
       dependencies: [

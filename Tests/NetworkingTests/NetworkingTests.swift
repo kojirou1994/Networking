@@ -2,7 +2,7 @@ import XCTest
 @testable import Networking
 import os
 
-@available(macOS 12.0, *)
+@available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
 final class NetworkingTests: XCTestCase {
   class TestURLSession: URLSessionNetworking {
 
