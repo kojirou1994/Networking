@@ -65,9 +65,16 @@ extension URLSessionNetworking {
     return task
   }
 
-  @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
   public func rawResponse(_ request: Request) async throws -> RawResponse {
-    let (data, response) = try await session.data(for: request)
-    return (response as! HTTPURLResponse, data)
+    if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *) {
+      let (data, response) = try await session.data(for: request)
+      return (response as! HTTPURLResponse, data)
+    } else {
+      return try await withCheckedThrowingContinuation { continuation in
+        execute(request) { result in
+          continuation.resume(with: result)
+        }
+      }
+    }
   }
 }
