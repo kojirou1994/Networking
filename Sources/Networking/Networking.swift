@@ -29,7 +29,6 @@ public protocol Networking {
   #endif
 
   func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
-  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable
 
   /// decode Decodable response
   func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable
