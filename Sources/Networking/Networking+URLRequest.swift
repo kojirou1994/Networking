@@ -5,6 +5,7 @@ import NIOFoundationCompat
 import FoundationNetworking
 #endif
 import DictionaryCoding
+import AnyEncodable
 
 extension DictionaryEncoder {
   public func encodeWWWFormUrlEncodedBody<T: Encodable>(_ v: T) throws -> String {
@@ -33,7 +34,20 @@ extension Networking where Request == URLRequest {
     guard E.RequestBody.self != Void.self else {
       return request
     }
-    if let custom = endpoint.body as? CustomRequestBody {
+    if let encodable = endpoint.body as? Encodable {
+      let body = AnyEncodable(encodable)
+      switch endpoint.contentType {
+      case .json: request.httpBody = try jsonEncoder.encode(body)
+      case .none: break // Already checked
+      case .wwwFormUrlEncoded:
+        request.httpBody = .init(try wwwFormUrlEncodedBody(for: body).utf8)
+      }
+      #if NETWORKING_LOGGING
+      if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+        logger.debug("Encoded URLRequest Body: \(String(decoding: request.httpBody!, as: UTF8.self))")
+      }
+      #endif
+    } else if let custom = endpoint.body as? CustomRequestBody {
       var body = Data()
       try custom.write(to: &body)
       #if NETWORKING_LOGGING
@@ -54,22 +68,6 @@ extension Networking where Request == URLRequest {
     } else {
       fatalError("Unsupported RequestBody type: \(E.self)")
     }
-    return request
-  }
-
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable {
-    var request = try baseRequest(endpoint)
-    switch endpoint.contentType {
-    case .json: request.httpBody = try jsonEncoder.encode(endpoint.body)
-    case .none: break // Already checked
-    case .wwwFormUrlEncoded:
-      request.httpBody = .init(try wwwFormUrlEncodedBody(for: endpoint.body).utf8)
-    }
-    #if NETWORKING_LOGGING
-    if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
-      logger.debug("Encoded URLRequest Body: \(String(decoding: request.httpBody!, as: UTF8.self))")
-    }
-    #endif
     return request
   }
 

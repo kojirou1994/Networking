@@ -2,14 +2,24 @@ import Foundation
 import NIOFoundationCompat
 import NIO
 import AsyncHTTPClient
+import AnyEncodable
 
 extension Networking where Request == HTTPClient.Request {
   public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
-    var request = try _request(endpoint)
+    var request = try baseRequest(endpoint)
     guard E.RequestBody.self != Void.self else {
       return request
     }
-    if let custom = endpoint.body as? CustomRequestBody {
+    if let encodable = endpoint.body as? Encodable {
+      let body = AnyEncodable(encodable)
+      switch endpoint.contentType {
+      case .json:
+        request.body = .data(try! jsonEncoder.encode(body))
+      case .none: break // Already checked
+      case .wwwFormUrlEncoded:
+        request.body = .string(try wwwFormUrlEncodedBody(for: body))
+      }
+    } else if let custom = endpoint.body as? CustomRequestBody {
       var body = ByteBufferView()
       try custom.write(to: &body)
       request.body = .byteBuffer(ByteBuffer(body))
@@ -23,20 +33,7 @@ extension Networking where Request == HTTPClient.Request {
     return request
   }
 
-  public func request<E>(_ endpoint: E) throws -> Request where E: Endpoint, E.RequestBody: Encodable {
-    var request = try _request(endpoint)
-
-    switch endpoint.contentType {
-    case .json:
-      request.body = .data(try! jsonEncoder.encode(endpoint.body))
-    case .none: break // Already checked
-    case .wwwFormUrlEncoded:
-      request.body = .string(try wwwFormUrlEncodedBody(for: endpoint.body))
-    }
-    return request
-  }
-
-  func _request<E>(_ endpoint: E) throws -> Request where E: Endpoint {
+  func baseRequest<E>(_ endpoint: E) throws -> Request where E: Endpoint {
     endpoint.check()
     var headers = HTTPHeaders()
     if endpoint.contentType != .none {

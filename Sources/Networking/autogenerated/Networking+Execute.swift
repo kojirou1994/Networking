@@ -18,54 +18,6 @@ extension Networking {
 
   @inlinable
   @discardableResult
-  public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable {
-    execute(try request(endpoint), completion: completion)
-  }
-  
-  @inlinable
-  @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: Decodable {
-    try executeRaw(endpoint) { result in
-      switch result {
-      case .success(let rawResponse):
-        do {
-          try endpoint.validate(networking: self, response: rawResponse)
-          completion(.success((
-            rawResponse.response,
-            .init(catching: { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) })
-          )))
-        } catch {
-          completion(.failure(error))
-        }
-      case .failure(let error):
-        completion(.failure(error))
-      }
-    }
-  }
-
-  @inlinable
-  @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.RequestBody: Encodable, E.ResponseBody: CustomResponseBody {
-    try executeRaw(endpoint) { result in
-      switch result {
-      case .success(let rawResponse):
-        do {
-          try endpoint.validate(networking: self, response: rawResponse)
-          completion(.success((
-            rawResponse.response,
-            .init(catching: { try self.decode(body: rawResponse.body) })
-          )))
-        } catch {
-          completion(.failure(error))
-        }
-      case .failure(let error):
-        completion(.failure(error))
-      }
-    }
-  }
-
-  @inlinable
-  @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: Decodable {
     try executeRaw(endpoint) { result in
       switch result {
