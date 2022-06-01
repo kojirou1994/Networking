@@ -17,7 +17,7 @@ extension AsyncHTTPClientNetworking {
 
   @inlinable
   public func eventLoopFuture(_ request: Request) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>> {
-    client.execute(request: request).map { response in
+    http.execute(request: request).map { response in
       let body = response.body ?? ByteBuffer(.init())
       return (response: response,
                    body: body.viewBytes(at: body.readerIndex, length: body.readableBytes) ?? ByteBufferView())
@@ -26,10 +26,19 @@ extension AsyncHTTPClientNetworking {
 
   @inlinable
   public var eventLoop: EventLoop {
-    client.eventLoopGroup.next()
+    http.eventLoopGroup.next()
   }
 
-  @available(* ,renamed: "http")
+  @available(macOS 10.15, *)
   @inlinable
-  var client: HTTPClient { http }
+  public func rawResponse(_ request: Request) async throws -> RawResponse {
+    try await withCheckedThrowingContinuation { continuation in
+      eventLoopFuture(request).whenComplete { result in
+        continuation.resume(with: result)
+      }
+    }
+  }
+
 }
+
+

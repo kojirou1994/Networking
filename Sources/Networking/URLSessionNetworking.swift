@@ -37,7 +37,7 @@ extension URLSessionNetworking {
   }
 
   @discardableResult
-  public func execute(_ request: URLRequest, completion: @escaping (RawResult) -> Void) -> Task {
+  public func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task {
     let task = session.dataTask(with: request) { data, response, error in
       guard error == nil else {
         #if NETWORKING_LOGGING
@@ -65,26 +65,10 @@ extension URLSessionNetworking {
     return task
   }
 
-  public func executeAndWait(_ request: Request, taskHandler: ((Task) -> Void)?) -> RawResult {
-    var result: RawResult!
-    var taskFinished = false
-    let condition = NSCondition()
-    condition.lock()
+  @available(macOS 12.0, *)
+  public func rawResponse(_ request: Request) async throws -> RawResponse {
 
-    let task = execute(request) { serverResult in
-      condition.lock()
-      result = serverResult
-      taskFinished = true
-      condition.signal()
-      condition.unlock()
-    }
-    taskHandler?(task)
-    
-    while !taskFinished {
-      condition.wait()
-    }
-    condition.unlock()
-
-    return result
+    let (data, response) = try await session.data(for: request)
+    return (response as! HTTPURLResponse, data)
   }
 }

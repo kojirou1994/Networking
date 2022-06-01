@@ -39,11 +39,10 @@ public protocol Networking {
   @discardableResult
   func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task
 
-//  #if compiler(>=5.5.2)
-//  func execute(_ request: Request) async throws -> RawResponse
-//  #endif
+  func rawResponse(_ request: Request) async throws -> RawResponse
 
-  func executeAndWait(_ request: Request, taskHandler: ((Task) -> Void)?) -> RawResult
+  /// Block the current thread and wait
+  func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws -> RawResponse
 }
 
 extension Networking {
@@ -55,4 +54,27 @@ extension Networking {
 
   @inlinable
   public var dictionaryEncoder: DictionaryEncoder { .init() }
+
+  public func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws -> RawResponse {
+    var result: RawResult!
+    var taskFinished = false
+    let condition = NSCondition()
+    condition.lock()
+
+    let task = execute(request) { serverResult in
+      condition.lock()
+      result = serverResult
+      taskFinished = true
+      condition.signal()
+      condition.unlock()
+    }
+    taskHandler?(task)
+
+    while !taskFinished {
+      condition.wait()
+    }
+    condition.unlock()
+
+    return try result.get()
+  }
 }

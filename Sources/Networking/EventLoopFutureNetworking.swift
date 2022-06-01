@@ -5,7 +5,7 @@ public protocol EventLoopFutureNetworking: Networking where Task == Void {
 
   var eventLoop: EventLoop { get }
 
-  func eventLoopFuture(_ request: Request) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>>
+  func eventLoopFuture(_ request: Request) -> EventLoopFuture<RawResponse>
 }
 
 extension EventLoopFutureNetworking {
@@ -15,9 +15,7 @@ extension EventLoopFutureNetworking {
   }
 
   @inlinable
-  public func executeAndWait(_ request: Request, taskHandler: ((Task) -> Void)?) -> RawResult {
-    .init {
-      try eventLoopFuture(request).wait()
-    }
+  public func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws -> RawResponse {
+    try eventLoopFuture(request).wait()
   }
 }

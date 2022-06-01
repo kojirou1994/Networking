@@ -2,18 +2,9 @@ import XCTest
 @testable import Networking
 import os
 
-@available(macOS 11.0, *)
+@available(macOS 12.0, *)
 final class NetworkingTests: XCTestCase {
   class TestURLSession: URLSessionNetworking {
-
-    func execute(_ request: URLRequest) async throws -> RawResponse {
-      if #available(macOS 12.0, *) {
-        let (data, res) = try await session.data(for: request, delegate: nil)
-        return (response: res as! HTTPURLResponse, body: data)
-      } else {
-        fatalError()
-      }
-    }
 
     var session: URLSession = .init(configuration: .ephemeral)
     #if NETWORKING_LOGGING
