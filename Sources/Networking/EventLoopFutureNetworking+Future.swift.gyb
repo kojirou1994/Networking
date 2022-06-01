@@ -19,7 +19,6 @@ extension EventLoopFutureNetworking {
   }
 
   % for responseBodyProtocol in responseBodyProtocols:
-  @inlinable
   public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.ResponseBody: ${responseBodyProtocol} {
     eventLoopFutureRaw(endpoint)
       .flatMapThrowing { rawResponse -> EndpointResponse<E> in

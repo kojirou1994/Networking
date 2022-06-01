@@ -15,7 +15,6 @@ extension Networking {
   }
 
   % for responseBodyProtocol in responseBodyProtocols:
-  @inlinable
   @discardableResult
   public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: ${responseBodyProtocol} {
     try executeRaw(endpoint) { result in
