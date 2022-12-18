@@ -12,3 +12,24 @@ extension StreamNetworking {
     })
   }
 }
+
+public extension StreamNetworking {
+  func segmentsStream<E>(_ endpoint: E) -> AsyncThrowingStream<E.ResponseBody, Error> where E: Endpoint, E.ResponseBody: Decodable {
+    .init { continuation in
+      do {
+        _ = try streamSegmented(endpoint, receiveCompletion: { completion in
+          let err: Error?
+          switch completion {
+          case .success: err = nil
+          case .failure(let error): err = error
+          }
+          continuation.finish(throwing: err)
+        }, receiveValue: { result in
+          continuation.yield(with: result)
+        })
+      } catch {
+        continuation.finish(throwing: error)
+      }
+    }
+  }
+}
