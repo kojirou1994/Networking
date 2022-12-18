@@ -37,7 +37,13 @@ let package = Package(
         .product(name: "DictionaryCoding", package: "DictionaryCoding"),
         .product(name: "AnyEncodable", package: "AnyEncodable"),
         .product(name: "Multipart", package: "Multipart"),
-      ]),
+      ],
+      exclude: [
+        "Networking+Decode.swift.gyb",
+        "EventLoopFutureNetworking+Future.swift.gyb",
+        "Networking+Execute.swift.gyb",
+      ]
+    ),
     .target(
       name: "AsyncHTTPClientNetworking",
       dependencies: [
