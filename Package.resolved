@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kojirou1994/Multipart.git",
       "state" : {
-        "revision" : "72f6875a839774dd3d46a1a72b0cc93e7a3c977d",
-        "version" : "0.2.0"
+        "revision" : "bd654705f9885a6343ec1b6cc939c1c9704db37d",
+        "version" : "0.2.1"
       }
     },
     {
