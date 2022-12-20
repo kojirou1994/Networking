@@ -3,7 +3,9 @@ import Foundation
 #if canImport(DictionaryCoding)
 import DictionaryCoding
 #endif
+#if NETWORKING_LOGGING
 import os
+#endif
 
 public protocol Networking {
   associatedtype Request
