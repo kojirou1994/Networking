@@ -66,15 +66,16 @@ extension URLSessionNetworking {
   }
 
   public func rawResponse(_ request: Request) async throws -> RawResponse {
+    #if canImport(Darwin)
     if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *) {
       let (data, response) = try await session.data(for: request)
       return (response as! HTTPURLResponse, data)
-    } else {
-      assert(autoResume)
-      return try await withCheckedThrowingContinuation { continuation in
-        execute(request) { result in
-          continuation.resume(with: result)
-        }
+    }
+    #endif
+    assert(autoResume)
+    return try await withCheckedThrowingContinuation { continuation in
+      execute(request) { result in
+        continuation.resume(with: result)
       }
     }
   }
