@@ -1,6 +1,8 @@
 @_exported import NIOHTTP1
 import Foundation
+#if canImport(DictionaryCoding)
 import DictionaryCoding
+#endif
 import os
 
 public protocol Networking {
@@ -21,7 +23,10 @@ public protocol Networking {
   /// Used when response body is Decodable and acceptType is json
   var jsonDecoder: JSONDecoder { get }
   var jsonEncoder: JSONEncoder { get }
+
+  #if canImport(DictionaryCoding)
   var dictionaryEncoder: DictionaryEncoder { get }
+  #endif
 
   #if NETWORKING_LOGGING
   @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
@@ -51,8 +56,10 @@ extension Networking {
   @inlinable
   public var jsonEncoder: JSONEncoder { .init() }
 
+  #if canImport(DictionaryCoding)
   @inlinable
   public var dictionaryEncoder: DictionaryEncoder { .init() }
+  #endif
 
   public func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws -> RawResponse {
     var result: RawResult!

@@ -34,7 +34,7 @@ let package = Package(
       dependencies: [
         .product(name: "NIOFoundationCompat", package: "swift-nio"),
         .product(name: "NIOHTTP1", package: "swift-nio"),
-        .product(name: "DictionaryCoding", package: "DictionaryCoding"),
+        .product(name: "DictionaryCoding", package: "DictionaryCoding", condition: .when(platforms: [.macOS, .iOS])),
         .product(name: "AnyEncodable", package: "AnyEncodable"),
         .product(name: "Multipart", package: "Multipart"),
       ],

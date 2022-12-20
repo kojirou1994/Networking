@@ -4,9 +4,10 @@ import NIOFoundationCompat
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import DictionaryCoding
 import AnyEncodable
 
+#if canImport(DictionaryCoding)
+import DictionaryCoding
 extension DictionaryEncoder {
   public func encodeWWWFormUrlEncodedBody<T: Encodable>(_ v: T) throws -> String {
     let dictionary = try encode(v) as [String: Any]
@@ -20,9 +21,15 @@ extension DictionaryEncoder {
     return queries.percentEncodedQuery!
   }
 }
+#endif
+
 extension Networking {
   public func wwwFormUrlEncodedBody<T: Encodable>(for body: T) throws -> String {
+    #if canImport(DictionaryCoding)
     try dictionaryEncoder.encodeWWWFormUrlEncodedBody(body)
+    #else
+    fatalError()
+    #endif
   }
 }
 
