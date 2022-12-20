@@ -70,6 +70,7 @@ extension URLSessionNetworking {
       let (data, response) = try await session.data(for: request)
       return (response as! HTTPURLResponse, data)
     } else {
+      assert(autoResume)
       return try await withCheckedThrowingContinuation { continuation in
         execute(request) { result in
           continuation.resume(with: result)
