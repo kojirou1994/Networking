@@ -1,1 +1,1 @@
-public typealias NetworkingResponse<R, Body> = (response: R, body: Body)
+public typealias NetworkingResponse<R: Sendable, Body: Sendable> = (response: R, body: Body)

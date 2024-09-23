@@ -43,7 +43,7 @@ public protocol Networking {
   func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody
 
   @discardableResult
-  func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task
+  func execute(_ request: Request, completion: @escaping @Sendable (RawResult) -> Void) -> Task
 
   func rawResponse(_ request: Request) async throws -> RawResponse
 
@@ -64,7 +64,9 @@ extension Networking {
   #endif
 
   public func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws -> RawResponse {
+    nonisolated(unsafe)
     var result: RawResult!
+    nonisolated(unsafe)
     var taskFinished = false
     let condition = NSCondition()
     condition.lock()

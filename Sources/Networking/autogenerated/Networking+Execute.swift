@@ -12,12 +12,12 @@ extension Networking {
 
   @inlinable
   @discardableResult
-  public func executeRaw<E>(_ endpoint: E, completion: @escaping (RawResult) -> Void) throws -> Task where E: Endpoint {
+  public func executeRaw<E>(_ endpoint: E, completion: @escaping @Sendable (RawResult) -> Void) throws -> Task where E: Endpoint {
     execute(try request(endpoint), completion: completion)
   }
 
   @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: Decodable {
+  public func execute<E>(_ endpoint: E, completion: @escaping @Sendable (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint & Sendable, E.ResponseBody: Decodable, Self: Sendable {
     try executeRaw(endpoint) { result in
       switch result {
       case .success(let rawResponse):
@@ -37,7 +37,7 @@ extension Networking {
   }
 
   @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  public func execute<E>(_ endpoint: E, completion: @escaping @Sendable (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint & Sendable, E.ResponseBody: CustomResponseBody, Self: Sendable {
     try executeRaw(endpoint) { result in
       switch result {
       case .success(let rawResponse):
