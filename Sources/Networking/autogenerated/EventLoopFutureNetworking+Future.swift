@@ -20,7 +20,7 @@ extension EventLoopFutureNetworking {
     }
   }
 
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.ResponseBody: Decodable {
+  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where Self: Sendable, E: Endpoint & Sendable, E.ResponseBody: Decodable {
     eventLoopFutureRaw(endpoint)
       .flatMapThrowing { rawResponse -> EndpointResponse<E> in
         try endpoint.validate(networking: self, response: rawResponse)
@@ -31,7 +31,7 @@ extension EventLoopFutureNetworking {
       }
   }
   
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where E: Endpoint, E.ResponseBody: CustomResponseBody {
+  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where Self: Sendable, E: Endpoint & Sendable, E.ResponseBody: CustomResponseBody {
     eventLoopFutureRaw(endpoint)
       .flatMapThrowing { rawResponse -> EndpointResponse<E> in
         try endpoint.validate(networking: self, response: rawResponse)

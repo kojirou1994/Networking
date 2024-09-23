@@ -37,7 +37,7 @@ extension URLSessionNetworking {
   }
 
   @discardableResult
-  public func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task {
+  public func execute(_ request: Request, completion: @escaping @Sendable (RawResult) -> Void) -> Task {
     let task = session.dataTask(with: request) { data, response, error in
       guard error == nil else {
         #if NETWORKING_LOGGING

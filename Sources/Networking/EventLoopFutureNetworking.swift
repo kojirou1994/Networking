@@ -10,7 +10,7 @@ public protocol EventLoopFutureNetworking: Networking where Task == Void {
 
 extension EventLoopFutureNetworking {
   @inlinable
-  public func execute(_ request: Request, completion: @escaping (RawResult) -> Void) -> Task {
+  public func execute(_ request: Request, completion: @escaping @Sendable (RawResult) -> Void) -> Task {
     eventLoopFuture(request).whenComplete(completion)
   }
 
