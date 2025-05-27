@@ -13,7 +13,7 @@ public protocol Endpoint {
   var contentType: ContentType { get }
   var queryItems: [URLQueryItem] { get }
   var headers: HTTPHeaders { get }
-  func validate<N: Networking>(networking: N, response: N.RawResponse) throws
+  func validate<N: Networking>(networking: N, response: NetworkingResponse<some ResponseProtocol, N.RawResponseBody?>) throws
 }
 
 public extension Endpoint {
@@ -24,7 +24,7 @@ public extension Endpoint {
   var headers: HTTPHeaders { .init() }
 
   @inlinable
-  func validate<N: Networking>(networking: N, response: N.RawResponse) throws {}
+  func validate<N: Networking>(networking: N, response: NetworkingResponse<some ResponseProtocol, N.RawResponseBody?>) throws {}
 }
 
 extension Endpoint {

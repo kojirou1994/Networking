@@ -82,11 +82,14 @@ extension Networking where Request == HTTPClient.Request {
 
 }
 
+extension HTTPClientResponse: ResponseProtocol {}
+
 public extension AsyncHTTPClientNetworking {
 
   func segmentedBody<E>(_ endpoint: E, deadline: NIODeadline = .distantFuture) async throws -> AsyncThrowingMapSequence<HTTPClientResponse.Body, E.ResponseBody> where E: Endpoint, E.ResponseBody: Decodable {
     let request = try asyncRequest(endpoint)
     let response = try await http.execute(request, deadline: deadline)
+    try endpoint.validate(networking: self, response: (response, nil))
     let acceptType = endpoint.acceptType
 
     return response.body.map { buf throws(NetworkingError) -> E.ResponseBody in

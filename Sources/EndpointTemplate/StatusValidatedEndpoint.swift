@@ -22,7 +22,7 @@ extension StatusValidatedEndpoint {
   }
 
   @inlinable
-  public func validate<N: Networking>(networking: N, response: N.RawResponse) throws {
+  public func validate<N: Networking>(networking: N, response: NetworkingResponse<some ResponseProtocol, N.RawResponseBody?>) throws {
     // the body is ignored
     if !validStatusCodes.contains(response.response.status) {
       throw InvalidHTTPStatus(status: response.response.status, headers: response.response.headers)
