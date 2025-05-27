@@ -7,7 +7,7 @@ import DictionaryCoding
 import os
 #endif
 
-public protocol Networking {
+public protocol Networking: Sendable {
   associatedtype Request
   associatedtype Response: ResponseProtocol
   associatedtype Task = Void

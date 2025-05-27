@@ -1,4 +1,4 @@
-public enum ContentType {
+public enum ContentType: Sendable {
   case none
   case json
   case wwwFormUrlEncoded

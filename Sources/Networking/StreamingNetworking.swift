@@ -1,13 +1,14 @@
 public protocol StreamNetworking: Networking {
   associatedtype StreamTask
-  func stream<E>(_ endpoint: E, receiveCompletion: @escaping (Result<Void, Error>) -> Void, receiveValue: @escaping (RawResponseBody) -> Void) throws -> StreamTask where E: Endpoint
+  func stream<E>(_ endpoint: E, receiveCompletion: @escaping @Sendable (Result<Void, Error>) -> Void, receiveValue: @escaping @Sendable (RawResponseBody) -> Void) throws -> StreamTask where E: Endpoint
 }
 
 extension StreamNetworking {
-  public func streamSegmented<E>(_ endpoint: E, receiveCompletion: @escaping (Result<Void, Error>) -> Void, receiveValue: @escaping (Result<E.ResponseBody, Error>) -> Void) throws -> StreamTask where E: Endpoint, E.ResponseBody: Decodable {
-    try stream(endpoint, receiveCompletion: receiveCompletion, receiveValue: { rawResponse in
+  public func streamSegmented<E>(_ endpoint: E, receiveCompletion: @escaping @Sendable (Result<Void, Error>) -> Void, receiveValue: @escaping @Sendable (Result<E.ResponseBody, Error>) -> Void) throws -> StreamTask where E: Endpoint, E.ResponseBody: Decodable {
+    let acceptType = endpoint.acceptType
+    return try stream(endpoint, receiveCompletion: receiveCompletion, receiveValue: { rawResponse in
       receiveValue(.init(catching: {
-        try self.decode(contentType: endpoint.acceptType, body: rawResponse)
+        try self.decode(contentType: acceptType, body: rawResponse)
       }))
     })
   }
