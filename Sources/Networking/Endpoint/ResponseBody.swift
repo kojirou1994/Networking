@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol CustomResponseBody {
+public protocol CustomResponseBody: Sendable {
   init<D>(_ data: D) throws where D: DataProtocol
 }
 
