@@ -82,38 +82,48 @@ extension Networking where Request == HTTPClient.Request {
 
 }
 
-extension AsyncHTTPClientNetworking {
-  public func stream<E>(_ endpoint: E, receiveCompletion: @escaping @Sendable (Result<Void, NetworkingError>) -> Void, receiveValue: @escaping @Sendable (RawResponseBody) -> Void) throws(NetworkingError) -> StreamTask where E: Endpoint {
-    let request = try request(endpoint)
-    return http.execute(request: request, delegate: StreamDelegate(receiveCompletion: receiveCompletion, receiveValue: receiveValue), deadline: nil)
+public extension AsyncHTTPClientNetworking {
+
+  func segmentedBody<E>(_ endpoint: E, timeout: TimeAmount = .seconds(8)) async throws -> AsyncThrowingMapSequence<HTTPClientResponse.Body, E.ResponseBody> where E: Endpoint, E.ResponseBody: Decodable {
+    let request = try asyncRequest(endpoint)
+    let response = try await http.execute(request, timeout: timeout)
+    let acceptType = endpoint.acceptType
+
+    return response.body.map { buf throws(NetworkingError) -> E.ResponseBody in
+      try self.decode(contentType: acceptType, body: buf).get()
+    }
   }
+
 }
 
-final class StreamDelegate: HTTPClientResponseDelegate, @unchecked Sendable {
-  internal init(receiveCompletion: @escaping @Sendable (Result<Void, NetworkingError>) -> Void, receiveValue: @escaping @Sendable (ByteBuffer) -> Void) {
+public final class HTTPAsyncStreamDelegate: HTTPClientResponseDelegate, @unchecked Sendable {
+
+  @inlinable
+  public init(receiveCompletion: @escaping @Sendable (Result<Void, NetworkingError>) -> Void, receiveValue: @escaping @Sendable (ByteBuffer) -> Void) {
     self.receiveCompletion = receiveCompletion
     self.receiveValue = receiveValue
   }
 
-  func didFinishRequest(task: HTTPClient.Task<Void>) throws -> Void {
+  public func didFinishRequest(task: HTTPClient.Task<Void>) throws -> Void {
     if let error = error {
       receiveCompletion(.failure(.network(error)))
     } else {
       receiveCompletion(.success(()))
     }
   }
-
+  @usableFromInline
   let receiveCompletion: @Sendable (Result<Void, NetworkingError>) -> Void
+  @usableFromInline
   let receiveValue: @Sendable (ByteBuffer) -> Void
   var error: Error?
 
-  typealias Response = Void
+  public typealias Response = Void
 
-  func didReceiveError(task: HTTPClient.Task<Void>, _ error: Error) {
+  public func didReceiveError(task: HTTPClient.Task<Void>, _ error: Error) {
     self.error = error
   }
 
-  func didReceiveBodyPart(task: HTTPClient.Task<Void>, _ buffer: ByteBuffer) -> EventLoopFuture<Void> {
+  public func didReceiveBodyPart(task: HTTPClient.Task<Void>, _ buffer: ByteBuffer) -> EventLoopFuture<Void> {
     receiveValue(buffer)
     return task.eventLoop.makeSucceededFuture(())
   }

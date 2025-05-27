@@ -5,9 +5,8 @@ import NIO
 
 extension HTTPClient.Response: ResponseProtocol {}
 
-public protocol AsyncHTTPClientNetworking: EventLoopFutureNetworking, StreamNetworking
-where Request == HTTPClient.Request, Response == HTTPClient.Response, RawResponseBody == ByteBuffer,
-      StreamTask == HTTPClient.Task<Void> {
+public protocol AsyncHTTPClientNetworking: EventLoopFutureNetworking
+where Request == HTTPClient.Request, Response == HTTPClient.Response, RawResponseBody == ByteBuffer {
 
   var http: HTTPClient { get }
 
