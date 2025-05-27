@@ -51,14 +51,14 @@ extension Networking where Request == HTTPClient.Request {
 }
 
 extension AsyncHTTPClientNetworking where Request == HTTPClient.Request {
-  public func stream<E>(_ endpoint: E, receiveCompletion: @escaping (Result<Void, Error>) -> Void, receiveValue: @escaping (RawResponseBody) -> Void) throws -> StreamTask where E: Endpoint {
+  public func stream<E>(_ endpoint: E, receiveCompletion: @escaping @Sendable (Result<Void, Error>) -> Void, receiveValue: @escaping @Sendable (RawResponseBody) -> Void) throws -> StreamTask where E: Endpoint {
     let request = try request(endpoint)
     return http.execute(request: request, delegate: StreamDelegate(receiveCompletion: receiveCompletion, receiveValue: receiveValue), deadline: nil)
   }
 }
 
-final class StreamDelegate: HTTPClientResponseDelegate {
-  internal init(receiveCompletion: @escaping (Result<Void, Error>) -> Void, receiveValue: @escaping (ByteBufferView) -> Void) {
+final class StreamDelegate: HTTPClientResponseDelegate, @unchecked Sendable {
+  internal init(receiveCompletion: @escaping @Sendable (Result<Void, Error>) -> Void, receiveValue: @escaping @Sendable (ByteBufferView) -> Void) {
     self.receiveCompletion = receiveCompletion
     self.receiveValue = receiveValue
   }
@@ -71,8 +71,8 @@ final class StreamDelegate: HTTPClientResponseDelegate {
     }
   }
 
-  let receiveCompletion: (Result<Void, Error>) -> Void
-  let receiveValue: (ByteBufferView) -> Void
+  let receiveCompletion: @Sendable (Result<Void, Error>) -> Void
+  let receiveValue: @Sendable (ByteBufferView) -> Void
   var error: Error?
 
   typealias Response = Void

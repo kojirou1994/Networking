@@ -12,7 +12,7 @@ public protocol Networking {
   associatedtype Response: ResponseProtocol
   associatedtype Task = Void
 
-  associatedtype RawResponseBody = [UInt8]
+  associatedtype RawResponseBody: Sendable = [UInt8]
 
   typealias RawResponse = NetworkingResponse<Response, RawResponseBody>
   typealias RawResult = Result<RawResponse, Error>
