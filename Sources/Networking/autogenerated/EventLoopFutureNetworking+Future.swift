@@ -12,32 +12,38 @@ import NIO
 extension EventLoopFutureNetworking {
 
   @inlinable
-  public func eventLoopFutureRaw<E>(_ endpoint: E) -> EventLoopFuture<RawResponse> where E: Endpoint {
+  public func rawFuture<E>(_ endpoint: E) -> EventLoopFuture<RawResponse> where E: Endpoint {
     do {
-      return eventLoopFuture(try request(endpoint))
+      return rawFuture(try request(endpoint))
     } catch {
       return eventLoop.makeFailedFuture(error)
     }
   }
 
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where Self: Sendable, E: Endpoint & Sendable, E.ResponseBody: Decodable {
-    eventLoopFutureRaw(endpoint)
+  public func decodedFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where Self: Sendable, E: Endpoint & Sendable, E.ResponseBody: Decodable {
+    rawFuture(endpoint)
       .flatMapThrowing { rawResponse -> EndpointResponse<E> in
         try endpoint.validate(networking: self, response: rawResponse)
+        guard let body = rawResponse.body else {
+          throw NetworkingError.emptyBody
+        }
         return (
           rawResponse.response,
-          .init { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) }
+          self.decode(contentType: endpoint.acceptType, body: body)
         )
       }
   }
   
-  public func eventLoopFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where Self: Sendable, E: Endpoint & Sendable, E.ResponseBody: CustomResponseBody {
-    eventLoopFutureRaw(endpoint)
+  public func decodedFuture<E>(_ endpoint: E) -> EventLoopFuture<EndpointResponse<E>> where Self: Sendable, E: Endpoint & Sendable, E.ResponseBody: CustomResponseBody {
+    rawFuture(endpoint)
       .flatMapThrowing { rawResponse -> EndpointResponse<E> in
         try endpoint.validate(networking: self, response: rawResponse)
+        guard let body = rawResponse.body else {
+          throw NetworkingError.emptyBody
+        }
         return (
           rawResponse.response,
-          .init { try self.decode(body: rawResponse.body) }
+          self.decode(body: body)
         )
       }
   }

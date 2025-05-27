@@ -14,11 +14,12 @@ public protocol Networking: Sendable {
 
   associatedtype RawResponseBody: Sendable = [UInt8]
 
-  typealias RawResponse = NetworkingResponse<Response, RawResponseBody>
-  typealias RawResult = Result<RawResponse, Error>
+  // body is nil when no body returned
+  typealias RawResponse = NetworkingResponse<Response, RawResponseBody?>
+  typealias RawResult = Result<RawResponse, NetworkingError>
 
-  typealias EndpointResponse<E: Endpoint> = NetworkingResponse<Response, Result<E.ResponseBody, Error>>
-  typealias EndpointResult<E: Endpoint> = Result<EndpointResponse<E>, Error>
+  typealias EndpointResponse<E: Endpoint> = NetworkingResponse<Response, Result<E.ResponseBody, NetworkingError>>
+  typealias EndpointResult<E: Endpoint> = Result<EndpointResponse<E>, NetworkingError>
 
   var urlComponents: URLComponents { get }
   var commonHTTPHeaders: HTTPHeaders { get }
@@ -35,22 +36,24 @@ public protocol Networking: Sendable {
   var logger: Logger { get }
   #endif
 
-  func request<E>(_ endpoint: E) throws -> Request where E: Endpoint
+  func request<E>(_ endpoint: E) throws(NetworkingError) -> Request where E: Endpoint
 
   /// decode Decodable response
-  func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable
+  func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) -> Result<ResponseBody, NetworkingError> where ResponseBody: Decodable
   /// decode custom response
-  func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody
+  func decode<ResponseBody>(body: RawResponseBody) -> Result<ResponseBody, NetworkingError> where ResponseBody: CustomResponseBody
 
   @discardableResult
   func execute(_ request: Request, completion: @escaping @Sendable (RawResult) -> Void) -> Task
 
-  func rawResponse(_ request: Request) async throws -> RawResponse
+  /// async version of execute(_:completion:)
+  func rawResponse(_ request: Request) async -> RawResult
 
   /// Block the current thread and wait
-  func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws -> RawResponse
+//  func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws(NetworkingError) -> RawResponse
 }
 
+// MARK: Default implementations
 extension Networking {
   @inlinable
   public var jsonDecoder: JSONDecoder { .init() }
@@ -63,7 +66,8 @@ extension Networking {
   public var dictionaryEncoder: DictionaryEncoder { .init() }
   #endif
 
-  public func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws -> RawResponse {
+  @available(*, unavailable)
+  public func waitRawResponse(_ request: Request, taskHandler: ((Task) -> Void)?) throws(NetworkingError) -> RawResponse {
     nonisolated(unsafe)
     var result: RawResult!
     nonisolated(unsafe)

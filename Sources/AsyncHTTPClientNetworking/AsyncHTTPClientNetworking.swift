@@ -6,7 +6,7 @@ import NIO
 extension HTTPClient.Response: ResponseProtocol {}
 
 public protocol AsyncHTTPClientNetworking: EventLoopFutureNetworking, StreamNetworking
-where Request == HTTPClient.Request, Response == HTTPClient.Response, RawResponseBody == ByteBufferView,
+where Request == HTTPClient.Request, Response == HTTPClient.Response, RawResponseBody == ByteBuffer,
       StreamTask == HTTPClient.Task<Void> {
 
   var http: HTTPClient { get }
@@ -16,11 +16,9 @@ where Request == HTTPClient.Request, Response == HTTPClient.Response, RawRespons
 extension AsyncHTTPClientNetworking {
 
   @inlinable
-  public func eventLoopFuture(_ request: Request) -> EventLoopFuture<NetworkingResponse<Response, RawResponseBody>> {
+  public func rawFuture(_ request: Request) -> EventLoopFuture<RawResponse> {
     http.execute(request: request).map { response in
-      let body = response.body ?? ByteBuffer(.init())
-      return (response: response,
-                   body: body.viewBytes(at: body.readerIndex, length: body.readableBytes) ?? ByteBufferView())
+      return (response: response, body: response.body)
     }
   }
 
@@ -31,10 +29,10 @@ extension AsyncHTTPClientNetworking {
 
   @available(macOS 10.15, *)
   @inlinable
-  public func rawResponse(_ request: Request) async throws -> RawResponse {
-    try await withCheckedThrowingContinuation { continuation in
-      eventLoopFuture(request).whenComplete { result in
-        continuation.resume(with: result)
+  public func rawResponse(_ request: Request) async -> RawResult {
+    await withCheckedContinuation { continuation in
+      rawFuture(request).whenComplete { result in
+        continuation.resume(returning: result.mapError(NetworkingError.network))
       }
     }
   }

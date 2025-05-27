@@ -12,24 +12,30 @@ extension Networking {
 
   @inlinable
   @discardableResult
-  public func executeRaw<E>(_ endpoint: E, completion: @escaping @Sendable (RawResult) -> Void) throws -> Task where E: Endpoint {
+  public func executeRaw<E>(_ endpoint: E, completion: @escaping @Sendable (RawResult) -> Void) throws(NetworkingError) -> Task where E: Endpoint {
     execute(try request(endpoint), completion: completion)
   }
 
   @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping @Sendable (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint & Sendable, E.ResponseBody: Decodable, Self: Sendable {
+  public func execute<E>(_ endpoint: E, completion: @escaping @Sendable (EndpointResult<E>) -> Void) throws(NetworkingError) -> Task where E: Endpoint & Sendable, E.ResponseBody: Decodable, Self: Sendable {
     try executeRaw(endpoint) { result in
       switch result {
       case .success(let rawResponse):
         do {
           try endpoint.validate(networking: self, response: rawResponse)
-          completion(.success((
-            rawResponse.response,
-            .init(catching: { try self.decode(contentType: endpoint.acceptType, body: rawResponse.body) })
-          )))
         } catch {
-          completion(.failure(error))
+          completion(.failure(.validation(error)))
+          return
         }
+        guard let body = rawResponse.body else {
+          completion(.failure(.emptyBody))
+          return
+        }
+        completion(.success((
+          rawResponse.response,
+          self.decode(contentType: endpoint.acceptType, body: body)
+        )))
+
       case .failure(let error):
         completion(.failure(error))
       }
@@ -37,19 +43,24 @@ extension Networking {
   }
 
   @discardableResult
-  public func execute<E>(_ endpoint: E, completion: @escaping @Sendable (EndpointResult<E>) -> Void) throws -> Task where E: Endpoint & Sendable, E.ResponseBody: CustomResponseBody, Self: Sendable {
+  public func execute<E>(_ endpoint: E, completion: @escaping @Sendable (EndpointResult<E>) -> Void) throws(NetworkingError) -> Task where E: Endpoint & Sendable, E.ResponseBody: CustomResponseBody, Self: Sendable {
     try executeRaw(endpoint) { result in
       switch result {
       case .success(let rawResponse):
         do {
           try endpoint.validate(networking: self, response: rawResponse)
-          completion(.success((
-            rawResponse.response,
-            .init(catching: { try self.decode(body: rawResponse.body) })
-          )))
         } catch {
-          completion(.failure(error))
+          completion(.failure(.validation(error)))
+          return
         }
+        guard let body = rawResponse.body else {
+          completion(.failure(.emptyBody))
+          return
+        }
+        completion(.success((
+          rawResponse.response,
+          self.decode(body: body)
+        )))
       case .failure(let error):
         completion(.failure(error))
       }

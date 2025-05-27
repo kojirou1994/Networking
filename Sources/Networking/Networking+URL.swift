@@ -2,7 +2,7 @@ import Foundation
 
 extension Networking {
   
-  public func url<E: Endpoint>(for endpoint: E) throws -> URL {
+  public func url<E: Endpoint>(for endpoint: E) throws(NetworkingError) -> URL {
     var components = urlComponents
     
     do {
@@ -29,7 +29,7 @@ extension Networking {
     }
 
     guard let url = components.url else {
-      throw NetworkingError.invalidURL(components)
+      throw .invalidURL(components)
     }
     return url
   }

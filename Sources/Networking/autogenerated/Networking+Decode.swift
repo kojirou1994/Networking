@@ -14,7 +14,7 @@ import NIOFoundationCompat
 extension Networking where RawResponseBody == Data {
 
   @inlinable
-  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable {
+  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) -> Result<ResponseBody, NetworkingError> where ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = String(decoding: body, as: UTF8.self)
@@ -23,7 +23,11 @@ extension Networking where RawResponseBody == Data {
     #endif
     switch contentType {
     case .json:
-      return try jsonDecoder.decode(ResponseBody.self, from: body)
+      do {
+        return try .success(jsonDecoder.decode(ResponseBody.self, from: body))
+      } catch {
+        return .failure(.decode(error))
+      }
     case .none: fatalError("Should never be called")
     case .wwwFormUrlEncoded:
       fatalError("Unsupported")
@@ -31,8 +35,12 @@ extension Networking where RawResponseBody == Data {
   }
 
   @inlinable
-  public func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody {
-    try .init(body)
+  public func decode<ResponseBody>(body: RawResponseBody) -> Result<ResponseBody, NetworkingError> where ResponseBody: CustomResponseBody {
+    do {
+      return try .success(.init(body))
+    } catch {
+      return .failure(.decode(error))
+    }
   }
 
 }
@@ -40,7 +48,7 @@ extension Networking where RawResponseBody == Data {
 extension Networking where RawResponseBody == ByteBuffer {
 
   @inlinable
-  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable {
+  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) -> Result<ResponseBody, NetworkingError> where ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = body.getString(at: body.readerIndex, length: body.readableBytes) ?? ""
@@ -49,7 +57,11 @@ extension Networking where RawResponseBody == ByteBuffer {
     #endif
     switch contentType {
     case .json:
-      return try jsonDecoder.decode(ResponseBody.self, from: body)
+      do {
+        return try .success(jsonDecoder.decode(ResponseBody.self, from: body))
+      } catch {
+        return .failure(.decode(error))
+      }
     case .none: fatalError("Should never be called")
     case .wwwFormUrlEncoded:
       fatalError("Unsupported")
@@ -57,8 +69,12 @@ extension Networking where RawResponseBody == ByteBuffer {
   }
 
   @inlinable
-  public func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody {
-    try .init(body.viewBytes(at: body.readerIndex, length: body.readerIndex) ?? ByteBufferView())
+  public func decode<ResponseBody>(body: RawResponseBody) -> Result<ResponseBody, NetworkingError> where ResponseBody: CustomResponseBody {
+    do {
+      return try .success(.init(body.readableBytesView))
+    } catch {
+      return .failure(.decode(error))
+    }
   }
 
 }
@@ -66,7 +82,7 @@ extension Networking where RawResponseBody == ByteBuffer {
 extension Networking where RawResponseBody == ByteBufferView {
 
   @inlinable
-  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) throws -> ResponseBody where ResponseBody: Decodable {
+  public func decode<ResponseBody>(contentType: ContentType, body: RawResponseBody) -> Result<ResponseBody, NetworkingError> where ResponseBody: Decodable {
     #if NETWORKING_LOGGING
     if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
       let bodyString = String(decoding: body, as: UTF8.self)
@@ -75,7 +91,11 @@ extension Networking where RawResponseBody == ByteBufferView {
     #endif
     switch contentType {
     case .json:
-      return try jsonDecoder.decode(ResponseBody.self, from: .init(body))
+      do {
+        return try .success(jsonDecoder.decode(ResponseBody.self, from: Data(body)))
+      } catch {
+        return .failure(.decode(error))
+      }
     case .none: fatalError("Should never be called")
     case .wwwFormUrlEncoded:
       fatalError("Unsupported")
@@ -83,8 +103,12 @@ extension Networking where RawResponseBody == ByteBufferView {
   }
 
   @inlinable
-  public func decode<ResponseBody>(body: RawResponseBody) throws -> ResponseBody where ResponseBody: CustomResponseBody {
-    try .init(body)
+  public func decode<ResponseBody>(body: RawResponseBody)-> Result<ResponseBody, NetworkingError> where ResponseBody: CustomResponseBody {
+    do {
+      return try .success(.init(body))
+    } catch {
+      return .failure(.decode(error))
+    }
   }
 
 }

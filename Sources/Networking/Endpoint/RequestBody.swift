@@ -1,7 +1,7 @@
 @_exported import Multipart
 
 public protocol CustomRequestBody {
-  func write<D: MutableCollection & RandomAccessCollection & RangeReplaceableCollection>(to data: inout D) throws where D.Element == UInt8
+  func write<D: MutableCollection & RandomAccessCollection & RangeReplaceableCollection>(to data: inout D) throws(NetworkingError) where D.Element == UInt8
 }
 
 public protocol MultipartRequestBody {

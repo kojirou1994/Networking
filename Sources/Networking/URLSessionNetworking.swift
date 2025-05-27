@@ -45,7 +45,7 @@ extension URLSessionNetworking {
           logger.error("URLRequest execute failed! Error: \((error as! URLError).localizedDescription)")
         }
         #endif
-        completion(.failure(error as! URLError))
+        completion(.failure(.network(error as! URLError)))
         return
       }
       let res = response as! HTTPURLResponse
@@ -57,7 +57,7 @@ extension URLSessionNetworking {
         logger.debug("Response body: \(data?.count ?? 0) bytes")
       }
       #endif
-      completion(.success((response: res, body: data ?? Data())))
+      completion(.success((response: res, body: data)))
     }
     if autoResume {
       task.resume()
@@ -65,17 +65,21 @@ extension URLSessionNetworking {
     return task
   }
 
-  public func rawResponse(_ request: Request) async throws -> RawResponse {
+  public func rawResponse(_ request: Request) async -> RawResult {
     #if canImport(Darwin)
     if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *) {
-      let (data, response) = try await session.data(for: request)
-      return (response as! HTTPURLResponse, data)
+      do {
+        let (data, response) = try await session.data(for: request)
+        return .success((response as! HTTPURLResponse, data.isEmpty ? nil : data))
+      } catch {
+        return .failure(.network(error))
+      }
     }
     #endif
     assert(autoResume)
-    return try await withCheckedThrowingContinuation { continuation in
+    return await withCheckedContinuation { continuation in
       execute(request) { result in
-        continuation.resume(with: result)
+        continuation.resume(returning: result)
       }
     }
   }

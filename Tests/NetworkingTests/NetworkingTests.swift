@@ -3,11 +3,11 @@ import XCTest
 import os
 
 final class NetworkingTests: XCTestCase {
-  class TestURLSession: URLSessionNetworking {
+  final class TestURLSession: URLSessionNetworking, @unchecked Sendable {
 
-    var session: URLSession = .init(configuration: .ephemeral)
+    let session: URLSession = .init(configuration: .ephemeral)
     #if NETWORKING_LOGGING
-    var logger: Logger = .init()
+    let logger: Logger = .init()
     #endif
     var urlComponents: URLComponents = .init()
 
@@ -62,7 +62,7 @@ protocol CustomValidationEndpoint: Endpoint {
 extension CustomValidationEndpoint {
   func validate<N>(networking: N, response: N.RawResponse) throws where N : Networking {
     if response.response.status != .ok {
-      throw try networking.decode(body: response.body) as RawStringResponse
+      throw try networking.decode(body: response.body!).get() as RawStringResponse
     }
   }
 }

@@ -22,11 +22,11 @@ extension PublishableURLSessionNetworking {
 
   public func publisher<E>(
     _ endpoint: E
-  ) -> AnyPublisher<NetworkingResponse<Response, Result<E.ResponseBody, Error>>, Error> where E: Endpoint, E.ResponseBody: Decodable {
+  ) -> AnyPublisher<NetworkingResponse<Response, Result<E.ResponseBody, NetworkingError>>, Error> where E: Endpoint, E.ResponseBody: Decodable {
     session.dataTaskPublisher(for: try! request(endpoint))
       .tryMap { output in
         let res = output.response as! HTTPURLResponse
-        return (response: res, body: .init{try self.decode(contentType: endpoint.acceptType, body: output.data)})
+        return (response: res, body: self.decode(contentType: endpoint.acceptType, body: output.data))
       }
       .eraseToAnyPublisher()
   }
